@@ -13,7 +13,7 @@ const poppins = Poppins({
 })
 
 export const metadata = {
-  title: "Infinite Co",
+  title: "SAPFIR School",
   description: "Created by Infinite Co",
 };
 
@@ -25,7 +25,8 @@ export default function RootLayout({ children }) {
           <HeaderSwitcher />
           <Login />
           <Register />
-          <main>{children}</main>
+          {children}
+          <main></main>
         </body>
       </html>
     </AccessProvider>

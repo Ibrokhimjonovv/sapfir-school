@@ -10,7 +10,7 @@ const HeaderSkeleton = () => {
   return (
     <>
       <div className="header-skeleton">
-        <div className="skeleton-balance"></div>
+        {/* <div className="skeleton-balance"></div> */}
         <div className="skeleton-profile"></div>
       </div>
     </>
@@ -38,7 +38,9 @@ const Header = () => {
       <header>
         <div className="header-inner">
           <div className="logo">
-            <Link href="/">TestIshla<span>.</span></Link>
+            <Link href="/">
+              <img src="/logo/logo.png" alt="" />
+            </Link>
           </div>
           <div className="hamb" onClick={toggleMen}>
             <span></span>
@@ -67,13 +69,13 @@ const Header = () => {
                 <HeaderSkeleton />
               ) : profileData !== null ? (
                 <>
-                  <Link href="/top-up-balance" className={`top-btn ${pathname === '/top-up-balance' ? "balance-act" : ""}`}>
+                  {/* <Link href="/top-up-balance" className={`top-btn ${pathname === '/top-up-balance' ? "balance-act" : ""}`}>
                     {formatBalance(profileData.balance)} UZS
                     <svg xmlns="http://www.w3.org/2000/svg" className="ionicon" viewBox="0 0 512 512">
                       <path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" strokeMiterlimit="10" strokeWidth="32"></path>
                       <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M256 176v160M336 256H176"></path>
                     </svg>
-                  </Link>
+                  </Link> */}
                   <Link href={profileData.is_superuser ? "/adminPanel/admin-sciences" : "/profile"} className={pathname === '/profile' ? "prof-act" : ""}>{profileData.is_superuser ? "Admin panel" : "Shaxsiy kabinet"}</Link>
                 </>
               ) : (
@@ -114,13 +116,13 @@ const Header = () => {
               <HeaderSkeleton />
             ) : profileData !== null ? (
               <>
-                <Link href="/top-up-balance" className={`top-btn ${pathname === '/top-up-balance' ? "balance-act" : ""}`}>
+                {/* <Link href="/top-up-balance" className={`top-btn ${pathname === '/top-up-balance' ? "balance-act" : ""}`}>
                   {formatBalance(profileData.balance)} UZS
                   <svg xmlns="http://www.w3.org/2000/svg" className="ionicon" viewBox="0 0 512 512">
                     <path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" strokeMiterlimit="10" strokeWidth="32"></path>
                     <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M256 176v160M336 256H176"></path>
                   </svg>
-                </Link>
+                </Link> */}
                 <Link href={profileData.is_superuser ? "/adminPanel/admin-sciences" : "/profile"} className={pathname === '/profile' ? "prof-act" : ""}>{profileData.is_superuser ? "Admin panel" : "Shaxsiy kabinet"}</Link>
               </>
             ) : (

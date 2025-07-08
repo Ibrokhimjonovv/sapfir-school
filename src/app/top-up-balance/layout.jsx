@@ -143,7 +143,7 @@ const BalanceTopUp = () => {
               ) : (
                 <>
                   <p>
-                    <span className="st">{profileData.surname} {profileData.name}</span> ning balansini oshirish!
+                    <span className="st">{profileData.last_name} {profileData.first_name}</span> ning balansini oshirish!
                   </p>
                   <p>Hozirgi balans: <span className="s">{profileData.balance}</span> so'm</p>
                   <div id="inp-w-s">

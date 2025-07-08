@@ -42,7 +42,7 @@ const Signup = () => {
     const [canResend, setCanResend] = useState(false);
     // const inputRefs = useRef([]);
     // const router = useRouter();
-    const { loginStat, setLoginStat, registerStat, setRegisterStat } = useContext(AccessContext)
+    const { loginStat, setLoginStat, registerStat, setRegisterStat, showNewNotification } = useContext(AccessContext)
 
     // const formatTime = (seconds) => {
     //     const mins = Math.floor(seconds / 60);
@@ -186,7 +186,7 @@ const Signup = () => {
                     username: formData.username,
                     phone_number: formData.phone_number,
                     password: formData.password,
-                    action: 'signup', 
+                    action: 'signup',
                 }),
             });
 
@@ -195,10 +195,10 @@ const Signup = () => {
                 setLoginStat(!loginStat);
                 setRegisterStat(!registerStat);
                 setErrors({ login: "", password: "" });
-                setSuccessM(true);
-                setTimeout(() => {
-                    setSuccessM(false);
-                }, 5000);
+                showNewNotification("Ro'yxatdan o'tdingiz!", "success", {
+                    persist: false,
+                    reloadAfter: false // This will trigger page reload
+                });
             } else {
                 const errorData = await response.json();
                 alert("Error: " + (errorData.message || "Noma'lum xato"));
@@ -428,7 +428,9 @@ const Signup = () => {
                             <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M256 112v288M400 256H112" />
                         </svg>
                     </div>
-                    <h1 className="logo">TestIshla<span>.</span></h1>
+                    <h1 className="logo">
+                        <img src="/logo/logo.png" alt="" />
+                    </h1>
                     <h1 style={{ fontSize: "32px" }}>
                         <span>Ro'yxatdan</span> o'ting
                     </h1>

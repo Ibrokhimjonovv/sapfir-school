@@ -126,7 +126,7 @@ const Login = () => {
             localStorage.setItem('refreshEdu', result.refresh);
 
             // Show notification that will persist through reload
-            showNewNotification("Muvaffaqiyatli kirildi!", "success", {
+            showNewNotification("Shaxsiy xisobingizga kirdingiz!", "success", {
                 persist: true,
                 reloadAfter: true // This will trigger page reload
             });
@@ -163,7 +163,7 @@ const Login = () => {
                         </svg>
                     </div>
                     <div className="logo">
-                        TestIshla<span>.</span>
+                        <img src="/logo/logo.png" alt="" />
                     </div>
                     <h1>
                         <span>Akkountingizga</span> kiring

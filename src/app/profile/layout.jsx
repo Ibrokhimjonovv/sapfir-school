@@ -43,16 +43,32 @@ const Profile = () => {
   const handleLogout = () => {
     localStorage.removeItem("accessEdu");
     localStorage.removeItem("refreshEdu");
-
-
     setProfileData(null);
     setProfileLoading(false);
     nav.push('/')
   };
-  console.log(profileData);
-  
+
   return (
     <section id="profile-section" >
+      {mod && <div className={`logout-shape`}></div>}
+      {
+        mod && (
+          <div className={`logout-opened-modal ${mod ? "active" : ""}`}>
+            <p >Haqiqatdan ham chiqmoqchimisiz?</p>
+            <div >
+              <button
+                type="button"
+                onClick={() => { setMod(false); }}
+              >
+                Bekor qilish
+              </button>
+              <button type="button" onClick={handleLogout}>
+                Chiqish
+              </button>
+            </div>
+          </div>
+        )
+      }
       <div className={`profile-container `}>
         <div className={`profile-header`}>
           <div className={`profile-header-inner`}>
@@ -67,9 +83,9 @@ const Profile = () => {
               allUsers={allUsers}
               balance={profileData.balance}
             />
-            <div className={`left-inner-1 mob-ver`}>
+            {/* <div className={`left-inner-1 mob-ver`}>
               <StaticLayout />
-            </div>
+            </div> */}
             <div className={`start-now mob-ver`}>
               <div className={`now-left`}>
                 Darajani oshirish
@@ -77,7 +93,7 @@ const Profile = () => {
               </div>
               <Link href="/tests/all">Boshlash</Link>
             </div>
-            <ComplatedTests id={profileData.id} />
+            {/* <ComplatedTests id={profileData.id} /> */}
           </div>
           <div className={`right`}>
             <div className={`user-profile`}>
@@ -121,25 +137,7 @@ const Profile = () => {
                   >
                     Chiqish
                   </button>
-                  {mod && <div className={`m-shape`}></div>}
-                  {
-                    mod && (
-                      <div className={`opened-modal ${mod ? "active" : ""}`}>
-                        <p >Haqiqatdan ham chiqmoqchimisiz?</p>
-                        <div >
-                          <button
-                            type="button"
-                            onClick={() => { setMod(false); }}
-                          >
-                            Bekor qilish
-                          </button>
-                          <button type="button" onClick={handleLogout}>
-                            Chiqish
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  }
+
                 </div>
               </div>
             </div>

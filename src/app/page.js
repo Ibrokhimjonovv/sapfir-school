@@ -3,7 +3,7 @@ import Tests from '@/components/tests/tests';
 import React from 'react';
 
 export const metadata = {
-  title: 'Bosh sahifa - Infinite Co',
+  title: 'Bosh sahifa - SAPFIR School',
   // description: 'AFD - Anime, Film va dramalarni o\'zida jam etgan bepul, sodda va reklamalarsiz bo\'lgan platforma!',
   // keywords: 'Anime, Film, Drama, Kdrama, Seriallar, O\'zbek tilida, Afd, AFD, AFD Platform, afd-platform, fantastika',
   // openGraph: {
