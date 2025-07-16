@@ -11,7 +11,7 @@ const Login = () => {
         password: '',
         action: 'login'
     });
-    const [type, setType] = useState("username");
+    const [type, setType] = useState("user");
     const [show, setShow] = useState(true);
     const [errors, setErrors] = useState({
         login: '',
@@ -102,16 +102,19 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const username = type === "phone"
-                ? cleanPhoneNumber(formData.login)
-                : formData.login;
+            // const username = type === "phone"
+            //     ? cleanPhoneNumber(formData.login)
+            //     : formData.login;
 
-            const response = await fetch('/site/user/auth/', {
+            const userType = type === 'user'
+                ? "/site/user/auth/"
+                : `${process.env.NEXT_PUBLIC_ADMIN_API}/login/`
+
+            const response = await fetch(userType, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'login',
-                    login: username,
+                    username: formData.login,
                     password: formData.password,
                 })
             });
@@ -122,21 +125,18 @@ const Login = () => {
                 throw new Error(result.error || 'Kirish muvaffaqiyatsiz');
             }
 
-            localStorage.setItem('accessEdu', result.access);
-            localStorage.setItem('refreshEdu', result.refresh);
-
-            // Show notification that will persist through reload
+            localStorage.setItem('sapfirAccess', result.access);
+            localStorage.setItem('sapfirRefresh', result.refresh);
+            localStorage.setItem('sapfirType', type)
             showNewNotification("Shaxsiy xisobingizga kirdingiz!", "success", {
                 persist: true,
-                reloadAfter: true // This will trigger page reload
+                reloadAfter: true
             });
 
-            // Don't need to call reload manually anymore
             setLoginStat(false);
             resteForm();
 
         } catch (error) {
-            // showNewNotification(error.message || 'Xatolik yuz berdi', "error");
             setErrors(prev => ({
                 ...prev,
                 form: error.message || 'Xatolik yuz berdi'
@@ -170,40 +170,40 @@ const Login = () => {
                     </h1>
 
                     <div className="login-type">
-                        <div className={`slide-type ${type === "username" ? "left" : "right"}`} >
-                            {type === "username" ? "Foydalanuvchi nomi" : "Telefon raqam"}
+                        <div className={`slide-type ${type === "user" ? "left" : "right"}`} >
+                            {type === "user" ? "Foydalanuvchi" : "Admin"}
                         </div>
-                        <div className={`username ${type === "username" ? "act" : ""}`} onClick={() => handleTypeChange("username")}  >
-                            Foydalanuvchi nomi
+                        <div className={`username ${type === "user" ? "act" : ""}`} onClick={() => handleTypeChange("user")}  >
+                            Foydalanuvchi
                         </div>
-                        <div className={`phone ${type === "phone" ? "act" : ""}`} onClick={() => handleTypeChange("phone")}>
-                            Telefon raqam
+                        <div className={`phone ${type === "admin" ? "act" : ""}`} onClick={() => handleTypeChange("admin")}>
+                            Admin
                         </div>
                     </div>
 
-
                     <form onSubmit={handleSubmit}>
                         <div className={`input-row`}>
-                            {type === "username" ? (
-                                <input
-                                    type="text"
-                                    name="login"
-                                    placeholder='Foydalanuvchi nomini kiriting'
-                                    value={formData.login}
-                                    onChange={handleChange}
-                                    className="us-input act"
-                                />
-                            ) : type === "phone" ? (
-                                <input
-                                    ref={inputRef}
-                                    type="tel"
-                                    name="login"
-                                    value={formData.login}
-                                    onChange={handlePhoneChange}
-                                    className="phone-input act"
-                                    placeholder='+998 (__) ___-__-__'
-                                />
-                            ) : null}
+                            {/* {type === "username" ? ( */}
+                            <input
+                                type="text"
+                                name="login"
+                                placeholder={type === 'user' ? "Foydalanuvchi nomini kiriting" : "Admin nomini kiriting"}
+                                value={formData.login}
+                                onChange={handleChange}
+                                className="us-input act"
+                            />
+                            {/* ) */}
+                            {/* //  : type === "phone" ? (
+                            //     <input
+                            //         ref={inputRef}
+                            //         type="tel"
+                            //         name="login"
+                            //         value={formData.login}
+                            //         onChange={handlePhoneChange}
+                            //         className="phone-input act"
+                            //         placeholder='+998 (__) ___-__-__'
+                            //     />
+                            // ) : null} */}
                             {errors.login && <span className="error-text">{errors.login}</span>}
                         </div>
                         <div className="input-row">

@@ -114,7 +114,7 @@ const Profile = () => {
                   )}
                   <div className={`texts`}>
                     <h1 className={`first-last-name`}>
-                      {profileData.first_name || "Yuklanmoqda..."} {profileData.surname}
+                      {profileData.first_name || "Yuklanmoqda..."} {profileData.last_name}
                     </h1>
                     <p className={`phone`}>{profileData.phone_number || "Yuklanmoqda..."}</p>
                     <p className={`username`}>{profileData.username}</p>

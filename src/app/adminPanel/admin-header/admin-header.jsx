@@ -21,9 +21,9 @@ const AdminHeader = () => {
   const pathName = usePathname();
   const { profileData } = useContext(AccessContext);
 
-  if(!profileData || !profileData.is_superuser) {
-    return <Header />
-  }
+  // if(!profileData || !profileData.is_superuser) {
+  //   return <Header />
+  // }
 
   return (
     <>
@@ -33,59 +33,59 @@ const AdminHeader = () => {
       <div id="admin-header">
         <div className="admin-header-inner">
           <div className="logo">
-            <div className="logo">
-              <Link href="/">TestIshla<span>.</span></Link>
-            </div>
+            <Link href="/">
+              <img src="/logo/logo.png" alt="" />
+            </Link>
           </div>
           <div className="menus">
-            <Link
-              className={pathName === "adminPanel/sciences" ? "act" : ""}
-              href="/adminPanel/admin-sciences"
-            >
-              Fanlar
-            </Link>
-            <Link
-              className={pathName === "adminPanel/departments" ? "act" : ""}
-              href="/adminPanel/admin-departments"
-            >
-              Bo'limlar
-            </Link>
-            {/* <NavLink
-              className={({ isActive }) =>
-                isActive ? "active-admin-link" : ""
-              }
-              to="/admin/tests"
-            >
-              Testlar
-            </NavLink> */}
-            <Link
-              className={pathName === "adminPanel/admin-create-test" ? "act" : ""}
-              href="/adminPanel/admin-create-test"
-            >
-              Testlar yaratish
-            </Link>
-            {/* <NavLink
-              className={({ isActive }) =>
-                isActive ? "active-admin-link" : ""
-              }
-              to="/admin/statics"
-            >
-              Statistikalar
-            </NavLink> */}
-            <Link
-              className={pathName === "adminPanel/add-word" ? "act" : ""}
-              href="/adminPanel/add-word"
-            >
-              Word qo'shish
-            </Link>
-            {/* <NavLink
-              className={({ isActive }) =>
-                isActive ? "active-admin-link" : ""
-              }
-              to="/admin/schools"
-            >
-              Maktablar qo'shish
-            </NavLink> */}
+            <div className="menu">
+              <Link
+                className={pathName === "adminPanel" ? "act" : ""}
+                href="/adminPanel"
+              >
+                Bosh sahifa
+              </Link>
+            </div>
+            <div className="menu">
+              <Link
+                className={pathName === "adminPanel/sciences" ? "act" : ""}
+                href=""
+              >
+                Ro'yxatdan o'tkazish
+              </Link>
+              <div className="box">
+                <Link href="/adminPanel/add-student">O'quvchi qo'shish</Link>
+                <Link href="/adminPanel/add-teacher">O'qituvchi qo'shish</Link>
+                <Link href="/adminPanel/classes/">Sinflar qo'shish</Link>
+              </div>
+            </div>
+            <div className="menu">
+              <Link
+                className={pathName === "adminPanel/sciences" ? "act" : ""}
+                href=""
+              >
+                Fanlar qo'shish
+              </Link>
+              <div className="box">
+                <Link href="/adminPanel/sciences">Fan qo'shish</Link>
+                <Link href="/adminPanel/add-test">Test qo'shish</Link>
+              </div>
+            </div>
+            <div className="menu">
+              <Link
+                // className={pathName === "adminPanel/sciences" ? "act" : ""}
+                href=""
+              >
+                Ro'yxatlar
+              </Link>
+              <div className="box">
+                <Link href="/adminPanel/all-students">O'quvchilar ro'yxati</Link>
+                <Link href="/adminPanel/all-teachers">O'qituvchilar ro'yxati</Link>
+                <Link href="/adminPanel/all-classes">Sinflar ro'yxati</Link>
+                <Link href="/adminPanel/all-sciences">Fanlar ro'yxati</Link>
+                <Link href="/adminPanel/all-tests">Testlar ro'yxati</Link>
+              </div>
+            </div>
           </div>
           <div className="admin-name">
             <Logout />

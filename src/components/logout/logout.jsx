@@ -8,8 +8,9 @@ const Logout = () => {
     const { setProfileData, setProfileLoading } = useContext(AccessContext)
     const nav = useRouter()
     const handleLogout = () => {
-        localStorage.removeItem("accessEdu");
-        localStorage.removeItem("refreshEdu");
+        localStorage.removeItem("sapfirAccess");
+        localStorage.removeItem("sapfirRefresh");
+        localStorage.removeItem("sapfirType");
 
         setProfileData(null);
         setProfileLoading(false);
@@ -25,7 +26,7 @@ const Logout = () => {
         <button
             onClick={handleLogout}
         >
-            Chiqish
+            Tizimdan chiqish
         </button>
     )
 }

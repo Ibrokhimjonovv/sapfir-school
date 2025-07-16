@@ -31,7 +31,7 @@ const Header = () => {
     setTogg(!togg)
   }
 
-  
+
 
   return (
     <>
@@ -76,12 +76,12 @@ const Header = () => {
                       <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" d="M256 176v160M336 256H176"></path>
                     </svg>
                   </Link> */}
-                  <Link href={profileData.is_superuser ? "/adminPanel/admin-sciences" : "/profile"} className={pathname === '/profile' ? "prof-act" : ""}>{profileData.is_superuser ? "Admin panel" : "Shaxsiy kabinet"}</Link>
+                  <Link href={profileData.is_superuser ? "/adminPanel/" : "/profile"} className={pathname === '/profile' ? "prof-act" : ""}>{profileData.is_superuser ? "Admin panel" : "Shaxsiy kabinet"}</Link>
                 </>
               ) : (
                 <>
                   <button onClick={() => setLoginStat(true)}>Kirish</button>
-                  <button onClick={() => setRegisterStat(true)}>Ro'yxatdan o'tish</button>
+                  {/* <button onClick={() => setRegisterStat(true)}>Ro'yxatdan o'tish</button> */}
                 </>
               )
             }
@@ -124,6 +124,7 @@ const Header = () => {
                   </svg>
                 </Link> */}
                 <Link href={profileData.is_superuser ? "/adminPanel/admin-sciences" : "/profile"} className={pathname === '/profile' ? "prof-act" : ""}>{profileData.is_superuser ? "Admin panel" : "Shaxsiy kabinet"}</Link>
+                
               </>
             ) : (
               <>
@@ -131,10 +132,6 @@ const Header = () => {
                   setLoginStat(true)
                   setTogg(false)
                 }}>Kirish</button>
-                <button onClick={() => {
-                  setRegisterStat(true)
-                  setTogg(false)
-                }}>Ro'yxatdan o'tish</button>
               </>
             )
           }

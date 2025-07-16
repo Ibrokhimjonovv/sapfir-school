@@ -10,35 +10,28 @@ const AccessProvider = ({ children }) => {
     const [loginStat, setLoginStat] = useState(false);
     const [registerStat, setRegisterStat] = useState(false);
 
-    // const [access, setAccess] = useState(false);
-    // useEffect(() => {
-    //     const savedAccess = localStorage.getItem("access");
-    //     if (savedAccess) {
-    //         setAccess(true)
-    //     }
-    // }, [])
-
     useEffect(() => {
         if (loginStat === true || registerStat === true) {
             document.body.classList.add("over");
         } else {
-            document.body.classList.remove("over")
+            document.body.classList.remove("over");
         }
-    }, [loginStat, registerStat])
-
-
+    }, [loginStat, registerStat]);
 
     const [profileLoading, setProfileLoading] = useState(false);
     const [profileData, setProfileData] = useState(null);
-
 
     useEffect(() => {
         const fetchProfile = async () => {
             setProfileLoading(true);
             try {
-                const token = localStorage.getItem("accessEdu");
+                const token = localStorage.getItem("sapfirAccess");
+                const userTypeLocalStorage = localStorage.getItem("sapfirType");
+                const userType = userTypeLocalStorage === "user"
+                    ? "/site/me"
+                    : `${process.env.NEXT_PUBLIC_ADMIN_API}/get-superuser-data/`
 
-                const response = await fetch('/site/me', { // API route'ga yo'naltirish
+                const response = await fetch(userType, {
                     method: "GET",
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -52,10 +45,9 @@ const AccessProvider = ({ children }) => {
                 }
 
                 const data = await response.json();
-                setProfileData(data);
+                setProfileData(data.data);
             } catch (error) {
                 console.error("Failed to fetch profile data:", error.message);
-                // Foydalanuvchiga xato haqida xabar berish
             } finally {
                 setProfileLoading(false);
             }
@@ -63,64 +55,27 @@ const AccessProvider = ({ children }) => {
         fetchProfile();
     }, []);
 
-    const [allUsers, setAllUsers] = useState([]);
-
-
-    // useEffect(() => {
-    //     const users = async () => {
-    //         try {
-    //             const response = await fetch(`${api}/api/users_count/`, {
-    //                 method: "GET",
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                 },
-    //             });
-
-    //             if (!response.ok) {
-    //                 const errorText = await response.text();
-    //                 throw new Error(`Tarmoq xatosi: ${response.status} - ${errorText}`);
-    //             }
-
-    //             const data = await response.json();
-
-    //             // Ma'lumot obyekt yoki ro'yxat bo'lsa, setProfileData orqali holatga solamiz
-    //             setAllUsers(data);
-
-
-    //         } catch (error) {
-    //             console.error("Failed to fetch profile data:", error.message);
-    //         }
-    //     };
-
-    //     users();
-    // }, []);
-
     const [notification, setNotification] = useState(null);
     const [showNotification, setShowNotification] = useState(false);
 
-    // Combined notification function with reload support
+    // ✅ Bildirishnomani ko‘rsatish funksiyasi
     const showNewNotification = (text, type, options = {}) => {
         const { persist = false, reloadAfter = false } = options;
         const newNotification = {
             text,
             type,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            extendedLifetime: reloadAfter,
+            shown: false // ⬅️ faqat bir marta ko‘rsatish uchun
         };
 
-        // Show immediately
         setNotification(newNotification);
         setShowNotification(true);
 
-        // Persist to localStorage if needed
         if (persist) {
-            localStorage.setItem('pendingNotification', JSON.stringify({
-                ...newNotification,
-                // Extended lifetime for reload cases
-                extendedLifetime: reloadAfter
-            }));
+            localStorage.setItem('pendingNotification', JSON.stringify(newNotification));
         }
 
-        // Auto-hide after 5 seconds
         const timer = setTimeout(() => {
             setShowNotification(false);
             setTimeout(() => {
@@ -131,31 +86,35 @@ const AccessProvider = ({ children }) => {
             }, 300);
         }, 5000);
 
-        // Handle page reload if needed
         if (reloadAfter) {
             setTimeout(() => {
                 window.location.reload();
-            }, 100); // Small delay to ensure notification is stored
+            }, 100);
         }
 
         return () => clearTimeout(timer);
     };
 
-    // Check for pending notifications on mount (with extended lifetime support)
+    // ✅ Faqat bir marta bildirishnoma chiqarish uchun
     useEffect(() => {
         const checkForNotifications = () => {
             const storedNotification = localStorage.getItem('pendingNotification');
             if (storedNotification) {
                 const parsedNotification = JSON.parse(storedNotification);
 
-                // Extended lifetime check (30 seconds for reload cases)
+                // Agar allaqachon ko‘rsatilgan bo‘lsa – chiqmasin
+                if (parsedNotification.shown) return;
+
                 const maxAge = parsedNotification.extendedLifetime ? 30000 : 10000;
 
                 if (Date.now() - parsedNotification.timestamp < maxAge) {
                     setNotification(parsedNotification);
                     setShowNotification(true);
 
-                    // Auto-hide after remaining time
+                    // Belgilaymiz: endi ko‘rsatilgan
+                    parsedNotification.shown = true;
+                    localStorage.setItem('pendingNotification', JSON.stringify(parsedNotification));
+
                     const remainingTime = Math.max(
                         1000,
                         maxAge - (Date.now() - parsedNotification.timestamp)
@@ -179,7 +138,6 @@ const AccessProvider = ({ children }) => {
         return () => window.removeEventListener('popstate', checkForNotifications);
     }, []);
 
-
     return (
         <AccessContext.Provider
             value={{
@@ -187,7 +145,10 @@ const AccessProvider = ({ children }) => {
                 setLoginStat,
                 registerStat,
                 setRegisterStat,
-                profileData, setProfileData, allUsers, profileLoading, setProfileLoading,
+                profileData,
+                setProfileData,
+                profileLoading,
+                setProfileLoading,
                 notification,
                 showNewNotification
             }}
@@ -202,7 +163,6 @@ const AccessProvider = ({ children }) => {
                     setNotification(null);
                 }}
             />
-
         </AccessContext.Provider>
     );
 };
