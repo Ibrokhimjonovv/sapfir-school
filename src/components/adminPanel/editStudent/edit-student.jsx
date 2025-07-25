@@ -22,16 +22,16 @@ const EditStudentModal = ({ student, onClose, onSuccess, isStatus }) => {
     const [selectedGrade, setSelectedGrade] = useState("");
 
     useEffect(() => {
-    if (isStatus) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = 'auto';
-    }
+        if (isStatus) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
 
-    return () => {
-        document.body.style.overflow = 'auto';
-    };
-}, [isStatus]);
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isStatus]);
 
     useEffect(() => {
         const fetchClassList = async () => {
@@ -153,7 +153,7 @@ const EditStudentModal = ({ student, onClose, onSuccess, isStatus }) => {
                 `${process.env.NEXT_PUBLIC_STUDENT_CREATE}/students/update/${student.id}/`,
                 payload
             );
-            onSuccess();
+            onSuccess({ ...payload, id: student.id });
             onClose();
         } catch (err) {
             setError("Yangilashda xatolik yuz berdi");

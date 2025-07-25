@@ -8,7 +8,7 @@ import "./add-option.scss";
 const AddOption = ({ isStatus, setIsStatus, initialData = null }) => {
   const [questions, setQuestions] = useState([]);
   const [formData, setFormData] = useState({
-    question_id: "",
+    question: "",
     text: "",
     is_correct: false,
   });
@@ -35,16 +35,17 @@ const AddOption = ({ isStatus, setIsStatus, initialData = null }) => {
       setFormData({
         text: initialData.text || "",
         is_correct: initialData.is_correct || false,
-        question_id: initialData.question?.id || "",
+        question: initialData.question || "",
       });
-    } else {
-      setFormData({ question_id: "", text: "", is_correct: false });
     }
   }, [initialData]);
 
+
   const validateForm = () => {
     const errors = {};
-    if (!formData.question_id) errors.question_id = "Savol tanlanishi kerak!";
+    if (!formData.question || isNaN(formData.question)) {
+      errors.question = "Savol tanlanishi kerak!";
+    }
     if (!formData.text.trim()) errors.text = "Variant matni kiritilishi kerak!";
     setDetailsError(errors);
     return Object.keys(errors).length === 0;
@@ -69,13 +70,16 @@ const AddOption = ({ isStatus, setIsStatus, initialData = null }) => {
           body: JSON.stringify(formData),
         });
 
+        console.log("Yuborilayotgan ma'lumot:", formData);
         if (!response.ok) throw new Error("Variantni yaratishda xatolik!");
         showNewNotification("Variant muvaffaqiyatli qo‘shildi!", "success");
+        window.location.reload();
       }
 
-      setFormData({ question_id: "", text: "", is_correct: false });
+
+
+      setFormData({ question: "", text: "", is_correct: false });
       setIsStatus(false);
-      window.location.reload();
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -86,12 +90,15 @@ const AddOption = ({ isStatus, setIsStatus, initialData = null }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
+  const { name, value, type, checked } = e.target;
+  setFormData(prev => ({
+    ...prev,
+    [name]:
+      type === 'checkbox' ? checked :
+      name === 'question' ? Number(value) : value,
+  }));
+};
+
 
   return (
     <div>
@@ -101,13 +108,20 @@ const AddOption = ({ isStatus, setIsStatus, initialData = null }) => {
         <form onSubmit={handleSubmit}>
           <div className="input-row">
             <label>Savol tanlang:</label>
-            <select name="question_id" value={formData.question_id} onChange={handleChange}>
-              <option value="">-- Savolni tanlang --</option>
-              {questions.map(q => (
-                <option key={q.id} value={q.id}>{q.text || q.name}</option>
+            <select
+              name="question"
+              value={Number(formData.question)}
+              onChange={handleChange}
+            >
+              <option value="">Savolni tanlang</option>
+              {questions.map((q) => (
+                <option key={q.id} value={q.id}>
+                  {q.text}
+                </option>
               ))}
             </select>
-            {detailsError.question_id && <span>{detailsError.question_id}</span>}
+
+            {detailsError.question && <span>{detailsError.question}</span>}
           </div>
 
           <div className="input-row">
@@ -144,10 +158,10 @@ const AddOption = ({ isStatus, setIsStatus, initialData = null }) => {
                   setFormData({
                     text: initialData.text || "",
                     is_correct: initialData.is_correct || false,
-                    question_id: initialData.question?.id || "",
+                    question: initialData.question || "",
                   });
                 } else {
-                  setFormData({ question_id: "", text: "", is_correct: false });
+                  setFormData({ question: "", text: "", is_correct: false });
                 }
               }}
             >

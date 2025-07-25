@@ -10,12 +10,12 @@ import Link from 'next/link';
 const ClassesTable = () => {
     const [classNumbers, setClassNumbers] = useState([]);
     const [classes, setClasses] = useState([]);
-    const [expanded, setExpanded] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingClassNumber, setEditingClassNumber] = useState(null);
     const { showNewNotification } = useContext(AccessContext)
     const [isEditClassModalOpen, setIsEditClassModalOpen] = useState(false);
     const [editingClass, setEditingClass] = useState(null);
+    const [expanded, setExpanded] = useState(null);
     const [expandedClasses, setExpandedClasses] = useState({});
     const [studentsByClass, setStudentsByClass] = useState({});
     const [openedClasses, setOpenedClasses] = useState({});
@@ -62,12 +62,15 @@ const ClassesTable = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ class_number: number })
+                body: JSON.stringify({ class_id: number })
             });
 
             const data = await res.json();
+            console.log('====================================');
+            console.log(data);
+            console.log('====================================');
 
-            setExpandedClasses(prev => ({ ...prev, [number]: data.data || [] }));
+            setExpandedClasses(prev => ({ ...prev, [number]: data.classes || [] }));
             setExpanded(number);
         } catch (error) {
             console.error("Sinflarni olishda xatolik:", error);
@@ -91,6 +94,9 @@ const ClassesTable = () => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_STUDENT_CREATE}/students/class-students/?class_name=${encodeURIComponent(className)}`);
             const data = await res.json();
+            console.log('====================================');
+            console.log(data);
+            console.log('====================================');
 
             setStudentsByClass(prev => ({
                 ...prev,
@@ -176,12 +182,12 @@ const ClassesTable = () => {
             <div className="accordion-wrapper">
                 {
                     classNumbers.length > 0 ? (classNumbers.map((num) => {
-                        const relatedClasses = expandedClasses[num.class_number] || [];
+                        const relatedClasses = expandedClasses[num.id] || [];
                         return (
-                            <div className={`accordion-item ${expanded === num.class_number ? 'active' : ''}`} key={num.id}>
+                            <div className={`accordion-item ${expanded === num.id ? 'active' : ''}`} key={num.id}>
                                 <div
-                                    className={`accordion-header ${expanded === num.class_number ? 'active' : ''}`}
-                                    onClick={() => toggleExpand(num.class_number)}
+                                    className={`accordion-header ${expanded === num.id ? 'active' : ''}`}
+                                    onClick={() => toggleExpand(num.id)}
                                 >
                                     <span>{num.class_number}</span>
                                     <div className="header-actions">
@@ -205,7 +211,7 @@ const ClassesTable = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <div className={`accordion-body ${expanded === num.class_number ? 'open' : ''}`}>
+                                <div className={`accordion-body ${expanded === num.id ? 'open' : ''}`}>
                                     {relatedClasses.length > 0 ? (
                                         <ul>
                                             {relatedClasses.map(cls => (

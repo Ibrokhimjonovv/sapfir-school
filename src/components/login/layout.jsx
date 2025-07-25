@@ -107,7 +107,7 @@ const Login = () => {
             //     : formData.login;
 
             const userType = type === 'user'
-                ? "/site/user/auth/"
+                ? `${process.env.NEXT_PUBLIC_STUDENT_CREATE}/students/login/`
                 : `${process.env.NEXT_PUBLIC_ADMIN_API}/login/`
 
             const response = await fetch(userType, {
@@ -127,6 +127,7 @@ const Login = () => {
 
             localStorage.setItem('sapfirAccess', result.access);
             localStorage.setItem('sapfirRefresh', result.refresh);
+            localStorage.setItem('sapfirUser', result.user_id);
             localStorage.setItem('sapfirType', type)
             showNewNotification("Shaxsiy xisobingizga kirdingiz!", "success", {
                 persist: true,
@@ -232,7 +233,7 @@ const Login = () => {
                         {errors.form && <div className="error-message">{errors.form}</div>}
 
 
-                        <div className="toggle-action">
+                        {/* <div className="toggle-action">
                             <button type="button" onClick={toggleAction}>
                                 {formData.action === 'signup'
                                     ? <>
@@ -242,7 +243,7 @@ const Login = () => {
                                         Akkountingiz yo'qmi? <span>Ro'yxatdan o'tish</span>
                                     </>}
                             </button>
-                        </div>
+                        </div> */}
 
 
                         <div className="input-row">

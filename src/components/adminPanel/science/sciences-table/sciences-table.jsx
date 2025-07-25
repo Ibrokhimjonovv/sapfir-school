@@ -46,7 +46,7 @@ const SciencesTable = () => {
             if (!subjectSections[subjectId]) {
                 setLoadingSections(prev => ({ ...prev, [subjectId]: true }));
                 try {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/sections/?subject=${subjectId}`);
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/sections/${subjectId}/`);
                     const data = await res.json();
                     setSubjectSections(prev => ({ ...prev, [subjectId]: data }));
                 } catch (error) {
@@ -134,7 +134,7 @@ const SciencesTable = () => {
                             {loadingSections[subject.id] ? (
                                 <p className="section-loading">Bo‘limlar yuklanmoqda...</p>
                             ) : (
-                                <ul>
+                                <ul className='subject-fcking-test-ul'>
                                     {
                                         (subjectSections[subject.id] && subjectSections[subject.id].length > 0) ? (
                                             subjectSections[subject.id].map(section => (

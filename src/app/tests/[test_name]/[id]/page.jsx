@@ -18,7 +18,6 @@ export default function TestComponent() {
   const { id } = params;
   const router = useRouter();
   const testId = id;
-
   const [currentTest, setCurrentTest] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [sciences, setSciences] = useState([]);
@@ -32,56 +31,75 @@ export default function TestComponent() {
   const [isZoomed, setIsZoomed] = useState(false);
   const { profileData } = useContext(AccessContext);
   const [opTracker, setOpTracker] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [testResult, setTestResult] = useState(null);
+
 
   useEffect(() => {
     const fetchTestData = async () => {
+      if (!profileData?.id || !testId) return; // oldini olish uchun
+
       try {
+        const token = localStorage.getItem("sapfirAccess");
         setLoading(true);
 
-        const questionsRes = await fetch(`${api}/edu_maktablar/test/${testId}/`);
-        const questionsData = await questionsRes.json();
+        const questionsRes = await fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/start-test/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            test_id: testId,
+            user_id: profileData.id,
+          }),
+        });
 
         if (!questionsRes.ok) {
           throw new Error('Failed to fetch questions');
         }
 
-        // Convert time from "HH:MM:SS" to minutes
-        const timeParts = questionsData.time.split(':');
-        const hours = parseInt(timeParts[0]);
-        const minutes = parseInt(timeParts[1]);
-        const totalMinutes = (hours * 60) + minutes;
+        const questionsDataData = await questionsRes.json();
+        const data = questionsDataData.data;
+
+        setSessionId(data.session_id);
+        const startedAt = new Date(data.started_at);
+        const totalMinutes = Math.ceil(data.test.tests_time) || 30;
+        const now = new Date();
+        const elapsedSeconds = Math.floor((now - startedAt) / 1000);
+        const remainingTime = totalMinutes * 60 - elapsedSeconds;
+
+        if (remainingTime <= 0) {
+          setTestStatus('timeout');
+          return;
+        }
 
         const testData = {
-          id: testId,
-          testTime: totalMinutes || 30,
-          science: questionsData.science || [],
-          testTitle: questionsData.title,
+          id: data.test.id,
+          testTime: totalMinutes,
+          science: [],
+          testTitle: data.test.name || "",
         };
-
         setCurrentTest(testData);
-        setTimeLeft(testData.testTime * 60);
+        setTimeLeft(remainingTime);
+        const formattedQuestions = data.user_questions.map((userQ) => {
+          const q = userQ.question;
+          const section = q.section;
+          const subject = section.subject;
 
-        // Convert questions_grouped_by_science object to array
-        const formattedQuestions = [];
-        for (const scienceName in questionsData.questions_grouped_by_science) {
-          const scienceQuestions = questionsData.questions_grouped_by_science[scienceName];
-          scienceQuestions.forEach((q, index) => {
-            formattedQuestions.push({
-              id: q.id,
-              text: q.text,
-              options: q.options.map((opt, idx) => ({
-                id: opt.id,
-                text: opt.text,
-                is_staff: opt.is_staff || false
-              })),
-              science_id: q.science_id,
-              science_name: scienceName, // Use the science name from the object key
-              score: q.score || 1,
-              time: q.time || null,
-              image: q.text.includes('<img') ? q.text.match(/src="([^"]*)"/)[1] : null
-            });
-          });
-        }
+          return {
+            id: q.id,
+            text: q.text,
+            options: q.options,
+            science_id: subject.id,
+            science_name: subject.name,
+            section_id: section.id,
+            section_name: section.name,
+            score: 1,
+            time: null,
+            image: q.text.includes('<img') ? q.text.match(/src="([^"]*)"/)?.[1] : null
+          };
+        });
 
         setQuestions(formattedQuestions);
 
@@ -96,14 +114,13 @@ export default function TestComponent() {
 
       } catch (error) {
         console.error('Error fetching test data:', error);
-        // router.push('/tests/all');
       } finally {
         setLoading(false);
       }
     };
 
     fetchTestData();
-  }, [testId, router]);
+  }, [testId, profileData]);
 
   const toggleZoom = () => {
     setIsZoomed(!isZoomed);
@@ -130,7 +147,7 @@ export default function TestComponent() {
 
     questions.forEach((question, index) => {
       const userAnswerId = selectedAnswers[index];
-      const correctOption = question.options.find(opt => opt.is_staff);
+      const correctOption = question.options.find(opt => opt.is_correct);
       if (userAnswerId && correctOption && userAnswerId === correctOption.id) {
         finalScore++;
       }
@@ -171,112 +188,115 @@ export default function TestComponent() {
       testStatus={testStatus}
       score={score}
       selectedAnswers={selectedAnswers}
+      resultData={testResult}
     />
   }
 
+
   const finishTest = async () => {
-  try {
-    let finalScore = 0;
+    try {
+      let finalScore = 0;
 
-    // Prepare answers data with validation
-    const answersData = [];
-    const validatedAnswers = {};
-    
-    // First validate all answers
-    for (const [index, answerId] of Object.entries(selectedAnswers)) {
-      const questionIndex = parseInt(index);
-      const question = questions[questionIndex];
-      
-      if (!question) {
-        console.error(`Question not found at index ${questionIndex}`);
-        continue;
+      // Prepare answers data with validation
+      const answersData = [];
+      const validatedAnswers = {};
+
+      // First validate all answers
+      for (const [index, answerId] of Object.entries(selectedAnswers)) {
+        const questionIndex = parseInt(index);
+        const question = questions[questionIndex];
+
+        if (!question) {
+          console.error(`Question not found at index ${questionIndex}`);
+          continue;
+        }
+
+        const selectedOption = question.options.find(opt => opt.id === answerId);
+        if (!selectedOption) {
+          console.error(`Option ${answerId} not found in question ${question.id}`);
+          continue;
+        }
+
+        // Count correct answers
+        const correctOption = question.options.find(opt => opt.is_correct);
+        if (correctOption && answerId === correctOption.id) {
+          finalScore++;
+        }
+
+        // Add to validated answers
+        answersData.push({
+          question_id: question.id,
+          option_id: answerId,
+        });
+
+        validatedAnswers[questionIndex] = answerId;
       }
-      
-      const selectedOption = question.options.find(opt => opt.id === answerId);
-      if (!selectedOption) {
-        console.error(`Option ${answerId} not found in question ${question.id}`);
-        continue;
+
+      // Calculate time metrics
+      const totalTimeTaken = currentTest.testTime * 60 - timeLeft;
+      const timePerQuestion = totalTimeTaken / questions.length;
+
+      // Prepare statistics data
+      const resultData = {
+        user: profileData?.id,
+        test_title: currentTest?.title || "Test",
+        correct_answers: finalScore,
+        incorrect_answers: questions.length - finalScore,
+        unanswered_questions: questions.length - Object.keys(validatedAnswers).length,
+        total_questions: questions.length,
+        percentage_correct: ((finalScore / questions.length) * 100).toFixed(2),
+        total_time_taken: totalTimeTaken,
+        time_per_question: { 1: 1 },
+      };
+
+      // Send requests
+      const [finishResponse] = await Promise.all([
+        // fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/edu_maktablar/statistics/`, {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     "Authorization": `Bearer ${localStorage.getItem("sapfirAccess")}`
+        //   },
+        //   body: JSON.stringify(resultData),
+        // }),
+        fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/submit-answers/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("sapfirAccess")}`
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            answers: answersData,
+            user_id: profileData?.id
+          }),
+        })
+      ]);
+
+      // Handle responses
+      // if (!statsResponse.ok) {
+      //   const statsError = await statsResponse.json();
+      //   console.error("Statistics error:", statsError);
+      //   throw new Error("Natijalarni saqlashda xato yuz berdi");
+      // }
+
+      if (!finishResponse.ok) {
+        const finishError = await finishResponse.json();
+        console.error("Finish error:", finishError);
+        throw new Error("Testni yakunlashda xato yuz berdi");
       }
-      
-      // Count correct answers
-      const correctOption = question.options.find(opt => opt.is_staff);
-      if (correctOption && answerId === correctOption.id) {
-        finalScore++;
-      }
-      
-      // Add to validated answers
-      answersData.push({
-        question_id: question.id,
-        selected_option_id: answerId,
-      });
-      
-      validatedAnswers[questionIndex] = answerId;
+
+      const finishResult = await finishResponse.json();
+      console.log("Finish result:", finishResult);
+
+      setScore(finalScore);
+      setTestResult(finishResult); // <-- yangi qo‘shilgan
+      setTestStatus('completed');
+
+    } catch (error) {
+      console.error("Testni yakunlashda xato:", error);
     }
-
-    // Calculate time metrics
-    const totalTimeTaken = currentTest.testTime * 60 - timeLeft;
-    const timePerQuestion = totalTimeTaken / questions.length;
-
-    // Prepare statistics data
-    const resultData = {
-      user: profileData?.id,
-      test_title: currentTest?.title || "Test",
-      correct_answers: finalScore,
-      incorrect_answers: questions.length - finalScore,
-      unanswered_questions: questions.length - Object.keys(validatedAnswers).length,
-      total_questions: questions.length,
-      percentage_correct: ((finalScore / questions.length) * 100).toFixed(2),
-      total_time_taken: totalTimeTaken,
-      time_per_question: {1:1},
-    };
-
-    // Send requests
-    const [statsResponse, finishResponse] = await Promise.all([
-      fetch(`${api}/edu_maktablar/statistics/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("accessEdu")}`
-        },
-        body: JSON.stringify(resultData),
-      }),
-      fetch(`${api}/edu_maktablar/finish/${testId}/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("accessEdu")}`
-        },
-        body: JSON.stringify({ 
-          answers: answersData,
-          user_id: profileData?.id 
-        }),
-      })
-    ]);
-
-    // Handle responses
-    if (!statsResponse.ok) {
-      const statsError = await statsResponse.json();
-      console.error("Statistics error:", statsError);
-      throw new Error("Natijalarni saqlashda xato yuz berdi");
-    }
-
-    if (!finishResponse.ok) {
-      const finishError = await finishResponse.json();
-      console.error("Finish error:", finishError);
-      throw new Error("Testni yakunlashda xato yuz berdi");
-    }
-
-    const finishResult = await finishResponse.json();
-    console.log("Finish result:", finishResult);
-
-    setScore(finalScore);
-    setTestStatus('completed');
-
-  } catch (error) {
-    console.error("Testni yakunlashda xato:", error);
-    alert(`Testni yakunlashda xato yuz berdi: ${error.message}`);
-  }
-};
+  };
 
   if (questions.length === 0) {
     return (
@@ -344,69 +364,24 @@ export default function TestComponent() {
     </div>
   );
 }
-
 const ProgressTracker = ({
   test = {},
   selectedAnswers = {},
   currentQuestionIndex = 0,
   isTestFinished = false,
   setCurrentQuestionIndex = () => { },
-  sciences = [],
-  opener, setOpener
+  opener,
+  setOpener,
 }) => {
-  const scienceIds = Array.isArray(test.science) ? test.science : [];
   const questions = Array.isArray(test.questions) ? test.questions : [];
 
-  const groupQuestionsByScience = () => {
-    const grouped = {};
-
-    scienceIds.forEach(scienceId => {
-      const science = sciences.find(s => s.id === scienceId);
-      if (science) {
-        grouped[scienceId] = {
-          id: scienceId,
-          name: science.title,
-          questions: [],
-          count: 0
-        };
-      }
-    });
-
-    questions.forEach((question, globalIndex) => {
-      const scienceId = question.science_id;
-      if (grouped[scienceId]) {
-        grouped[scienceId].questions.push({
-          ...question,
-          globalIndex
-        });
-        grouped[scienceId].count++;
-      }
-    });
-
-    const sortedGroups = Object.values(grouped).sort((a, b) => b.count - a.count);
-
-    let globalCounter = 0;
-    const finalGroups = sortedGroups.map(group => {
-      const questionsWithGlobalIndices = group.questions.map(q => ({
-        ...q,
-        displayIndex: globalCounter++
-      }));
-      return {
-        ...group,
-        questions: questionsWithGlobalIndices
-      };
-    });
-
-    return finalGroups;
-  };
-
-  const getQuestionStatus = (question) => {
-    const isAnswered = selectedAnswers.hasOwnProperty(question.globalIndex);
+  const getQuestionStatus = (questionIndex) => {
+    const isAnswered = selectedAnswers.hasOwnProperty(questionIndex);
     let answerLetter = "";
 
-    if (isAnswered && questions[question.globalIndex]) {
-      const selectedOptionId = selectedAnswers[question.globalIndex];
-      const selectedOptionIndex = questions[question.globalIndex].options.findIndex(
+    if (isAnswered) {
+      const selectedOptionId = selectedAnswers[questionIndex];
+      const selectedOptionIndex = questions[questionIndex]?.options?.findIndex(
         opt => opt.id === selectedOptionId
       );
       if (selectedOptionIndex >= 0) {
@@ -416,8 +391,8 @@ const ProgressTracker = ({
 
     if (isTestFinished) {
       if (isAnswered) {
-        const correctOption = questions[question.globalIndex].options.find(opt => opt.is_staff);
-        const isCorrect = correctOption?.id === selectedAnswers[question.globalIndex];
+        const correctOption = questions[questionIndex].options.find(opt => opt.is_correct);
+        const isCorrect = correctOption?.id === selectedAnswers[questionIndex];
         return {
           status: isCorrect ? "correct" : "incorrect",
           answerLetter
@@ -435,51 +410,34 @@ const ProgressTracker = ({
     };
   };
 
-  const formatScienceTitle = (title) => {
-    if (title.includes("_kasbiy_stan") || title.includes("Kasbiy_standart")) {
-      return `${title.split('_')[0]} (Kasbiy standart)`;
-    } else if (title.includes("_ped_mahorat") || title.includes("Pedmahorat")) {
-      return `${title.split('_')[0]} (Pedagogik mahorat)`;
-    }
-    return title;
-  };
-
-  const scienceGroups = groupQuestionsByScience();
-
   return (
     <div className={`progress-tracker ${opener ? "act" : ""}`}>
       <div className="closer" onClick={() => setOpener(false)}>
-        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M184 112l144 144-144 144" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" className="ionicon" viewBox="0 0 512 512">
+          <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="48" d="M184 112l144 144-144 144" />
+        </svg>
       </div>
-      <h2>{test.title}</h2>
-      {scienceGroups.map((science) => (
-        <div key={science.id} className="subject-section">
-          <div className="subject-header">
-            <h3>{formatScienceTitle(science.name)}</h3>
-            <span className="question-count">
-              {science.count} ta
-            </span>
-          </div>
-          <div className="subject-questions">
-            {science.questions.map((question) => {
-              const { status, answerLetter } = getQuestionStatus(question);
-              const isCurrent = question.globalIndex === currentQuestionIndex;
+      <div className="questions-section">
+        <p className="question-count">Savollar soni: {questions.length} ta</p>
+        <div className="tracker-questions">
+          {questions.map((question, index) => {
+            const { status, answerLetter } = getQuestionStatus(index);
+            const isCurrent = index === currentQuestionIndex;
 
-              return (
-                <div
-                  key={question.id}
-                  className={`circle ${status} ${isCurrent ? "current" : ""}`}
-                  onClick={() => setCurrentQuestionIndex(question.globalIndex)}
-                  title={`Savol ${question.displayIndex + 1} - ${answerLetter ? `Tanlangan variant: ${answerLetter}` : 'Javob berilmagan'}`}
-                >
-                  {question.displayIndex + 1}
-                  {answerLetter && <span className="selected-option">{answerLetter}</span>}
-                </div>
-              );
-            })}
-          </div>
+            return (
+              <div
+                key={question.id || index}
+                className={`circle ${status} ${isCurrent ? "current" : ""}`}
+                onClick={() => setCurrentQuestionIndex(index)}
+                title={`Savol ${index + 1} - ${answerLetter ? `Tanlangan: ${answerLetter}` : 'Javob berilmagan'}`}
+              >
+                {index + 1}
+                {answerLetter && <span className="selected-option">{answerLetter}</span>}
+              </div>
+            );
+          })}
         </div>
-      ))}
+      </div>
     </div>
   );
 };

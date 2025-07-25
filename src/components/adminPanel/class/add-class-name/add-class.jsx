@@ -9,6 +9,7 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
     const [formData, setFormData] = useState({
         class_number: '',
         class_name: '',
+        tg_number: '', // ✅ qo‘shildi
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -35,16 +36,19 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
             setFormData({
                 class_number: initialData.class_number,
                 class_name: initialData.class_name,
+                tg_number: initialData.tg_number || '',
             });
         } else {
-            setFormData({ class_number: '', class_name: '' });
+            setFormData({ class_number: '', class_name: '', tg_number: '' });
         }
     }, [initialData]);
+
 
     const validateForm = () => {
         let errors = {};
         if (!formData.class_number) errors.class_number = "Sinf raqami tanlanishi kerak!";
         if (!formData.class_name.trim()) errors.class_name = "Sinf harfi kiritilishi kerak!";
+        if (!formData.tg_number.trim()) errors.tg_number = "Telegram raqami kiritilishi kerak!";
         setDetailsError(errors);
         return Object.keys(errors).length === 0;
     };
@@ -106,7 +110,7 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
                             >
                                 <option value="">Sinf raqamini tanlang</option>
                                 {classNumbers.map(item => (
-                                    <option key={item.id} value={item.class_number}>
+                                    <option key={item.id} value={item.id}>
                                         {item.class_number}
                                     </option>
                                 ))}
@@ -123,6 +127,17 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
                             />
                             {detailsError.class_name && <span>{detailsError.class_name}</span>}
                         </div>
+                        <div className="input-row">
+                            <input
+                                type="text"
+                                name="tg_number"
+                                value={formData.tg_number}
+                                onChange={handleChange}
+                                placeholder="Telegram raqamini kiriting"
+                            />
+                            {detailsError.tg_number && <span>{detailsError.tg_number}</span>}
+                        </div>
+
                         <div className="input-row submit-button">
                             <button
                                 type="button"
@@ -134,9 +149,10 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
                                         setFormData({
                                             class_number: initialData.class_number,
                                             class_name: initialData.class_name,
+                                            tg_number: initialData.tg_number || '',
                                         });
                                     } else {
-                                        setFormData({ class_number: '', class_name: '' });
+                                        setFormData({ class_number: '', class_name: '', tg_number: '' });
                                     }
                                 }}
                             >
@@ -148,8 +164,8 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
                                         ? "Saqlanmoqda..."
                                         : "Qo'shilmoqda..."
                                     : initialData
-                                    ? "Saqlash"
-                                    : "Qo'shish"}
+                                        ? "Saqlash"
+                                        : "Qo'shish"}
                             </button>
                         </div>
                     </form>

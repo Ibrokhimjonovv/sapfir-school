@@ -110,19 +110,16 @@ const AddStudent = () => {
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    // Agar sinf raqami o'zgarsa, unga mos harfli variantlarni chiqarish
     if (name === "class_number_id") {
       setFormData(prev => ({
         ...prev,
         [name]: value,
       }));
-
-      // Harflar ro'yxati
-      const letters = ["A", "B", "D"];
-      const newClassLetters = letters.map(letter => `${value}-${letter}`);
-      setClassLetterOptions(newClassLetters);
-      setSelectedClassLetter(""); // Har safar sinf o'zgarganda harfni tozalaymiz
-    } else if (name === "class_letter") {
+      setSelectedGrade(value);
+      setSelectedClassLetter("");
+      fetchClassNamesByNumber(value);
+    }
+    else if (name === "class_letter") {
       setSelectedClassLetter(value);
     } else {
       setFormData(prev => ({
@@ -198,7 +195,7 @@ const AddStudent = () => {
           province: regionName,
           district: districtName,
           birthday: formatDateToISO(birthdayValue),
-          class_name_id: selectedClassLetter, 
+          class_name_id: selectedClassLetter,
           class_number_id: selectedGrade
         }),
       })
@@ -227,10 +224,14 @@ const AddStudent = () => {
           confirmPassword: "",
           about_us: ""
         })
-
         showNewNotification("Ro'yxatdan o'tish muvaffaqiyatli amalga oshirildi!", "success");
       } else {
-        showNewNotification("Ro'yxatdan o'tish amalga oshirilmadi!", "error");
+        const errorData = await response.json(); // JSON formatda xatoliklar
+        if (errorData.error && errorData.error.username) {
+          showNewNotification("Foydalanuvchi nomi allaqachon band!", "warning");
+        } else {
+          showNewNotification("Ro'yxatdan o'tish amalga oshirilmadi!", "error");
+        }
       }
     } catch (error) {
       setError(error.message)
@@ -259,6 +260,25 @@ const AddStudent = () => {
     showMask: false,
     separate: true,
   });
+
+  const fetchClassNamesByNumber = async (classNumberId) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CLASSESS_API}/classes/get-classes-by-number/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ class_id: classNumberId }),
+      });
+
+      const result = await response.json();
+      const classNames = result.classes || [];
+      setClassLetterOptions(classNames);
+    } catch (error) {
+      console.error("Class names fetchda xatolik:", error);
+    }
+  };
+
 
   return (
     <div className='add-student-container'>
@@ -316,12 +336,13 @@ const AddStudent = () => {
               <select
                 name="class_number_id"
                 value={selectedGrade}
-                onChange={(e) => setSelectedGrade(e.target.value)}
+                onChange={handleChange}  // <-- handleChange chaqirilsin
                 className={selectedGrade == "" ? "disabled" : ""}
               >
+
                 <option value="" disabled>O'quvchini sinfini tanlang!</option>
                 {classNumbers.map(cls => (
-                  <option key={cls.id} value={cls.class_number}>
+                  <option key={cls.id} value={cls.id}>
                     {cls.class_number}
                   </option>
                 ))}
@@ -330,19 +351,20 @@ const AddStudent = () => {
             </div>
             <div className="input-row">
               <select
-                name="class_letter"
+                name="class_name_id"
                 value={selectedClassLetter}
-                onChange={(e) => setSelectedClassLetter(e.target.value)}
                 className={selectedGrade === "" ? "disabled" : ""}
+                onChange={(e) => {
+                  setSelectedClassLetter(e.target.value);
+                  setFormData(prev => ({ ...prev, class_name_id: e.target.value }));
+                }}
               >
-                <option value="" disabled>Sinf harfini tanlang!</option>
-                {classList
-                  .filter(cls => cls.class_number === selectedGrade)
-                  .map(cls => (
-                    <option key={cls.id} value={cls.class_name}>
-                      {cls.class_name}
-                    </option>
-                  ))}
+                <option value="">Sinf harfini tanlang</option>
+                {classLetterOptions.map(item => (
+                  <option key={item.id} value={item.class_name}>
+                    {item.class_name}
+                  </option>
+                ))}
               </select>
               {detailsError.class_letter && <span>{detailsError.class_letter}</span>}
             </div>

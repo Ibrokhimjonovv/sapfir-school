@@ -5,11 +5,12 @@ import parse from "html-react-parser";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 
-const Results = ({ 
-  testStatus, 
-  questions, 
-  score, 
-  selectedAnswers 
+const Results = ({
+    testStatus,
+    questions,
+    score,
+    selectedAnswers,
+    resultData
 }) => {
     const router = useRouter();
 
@@ -18,7 +19,7 @@ const Results = ({
         let correctAnswers = 0;
         questions.forEach((question, index) => {
             const userAnswerId = selectedAnswers?.[index];
-            const correctOption = question.options.find(opt => opt.is_staff);
+            const correctOption = question.options.find(opt => opt.is_correct);
             if (userAnswerId && correctOption && userAnswerId === correctOption.id) {
                 correctAnswers++;
             }
@@ -150,8 +151,10 @@ const Results = ({
         return text;
     };
 
-    const actualScore = calculateScore();
-    const percentage = Math.round((actualScore / questions.length) * 100);
+    const actualScore = resultData?.correct_answers || 0;
+    const totalAnswers = resultData?.total_answers || 0;
+    const incorrectAnswers = resultData?.incorrect_answers || 0;
+    const percentage = Math.round((actualScore / totalAnswers) * 100);
 
     return (
         <div className="test-container">
@@ -164,7 +167,8 @@ const Results = ({
                     <h3>Javoblaringizni ko'rib chiqing:</h3>
                     {questions.map((question, index) => {
                         const userAnswerId = selectedAnswers?.[index];
-                        const correctOption = question.options.find(opt => opt.is_staff);
+
+                        const correctOption = question.options.find(opt => opt.is_correct);
                         const userOption = question.options.find(opt => opt.id === userAnswerId);
                         const isCorrect = correctOption?.id === userAnswerId;
                         const hasAnswer = userAnswerId !== undefined && userAnswerId !== null;
@@ -178,7 +182,7 @@ const Results = ({
                                 <div className="options-review">
                                     {question.options.map((option) => {
                                         let optionClass = '';
-                                        const isCorrectOption = option.is_staff;
+                                        const isCorrectOption = option.is_correct;
                                         const isUserAnswer = option.id === userAnswerId;
 
                                         if (hasAnswer) {

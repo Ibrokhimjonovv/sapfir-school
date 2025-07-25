@@ -70,6 +70,14 @@
     }
   }
 
+  &.warning {
+    background-color: orange;
+
+    .notification-close {
+      color: orange;
+    }
+  }
+
   .little-title {
     font-size: 14px;
   }

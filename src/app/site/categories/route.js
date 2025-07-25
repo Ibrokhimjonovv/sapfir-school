@@ -1,10 +1,10 @@
 // export const dynamic = 'force-dynamic'; 
 
 export async function GET() {
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+  const API_BASE = process.env.NEXT_PUBLIC_TESTS_API;
   
   try {
-    const response = await fetch(`${API_BASE}/edu_maktablar/all_category/`, {
+    const response = await fetch(`${API_BASE}/test/all-category/`, {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -18,7 +18,7 @@ export async function GET() {
     
     return Response.json({
       success: true,
-      data: data
+      data: data.data
     });
   } catch (error) {
     return Response.json({

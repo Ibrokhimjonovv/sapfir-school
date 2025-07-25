@@ -80,15 +80,15 @@ const AllStudents = () => {
         router.push(`/adminPanel/all-students?${query.toString()}`);
     };
 
+    // Sahifa birinchi marta yuklanganda searchParams'dan grade va classes'ni olish
     useEffect(() => {
-        if (classList.length > 0) {
-            const grade = searchParams.get('grade');
-            const classes = searchParams.get('classes');
+        const grade = searchParams.get('grade');
+        const classes = searchParams.get('classes');
 
-            if (grade) setSelectedGrade(grade);
-            if (classes) setSelectedClasses(classes.split(','));
-        }
-    }, [classList]);
+        if (grade) setSelectedGrade(parseInt(grade));
+        if (classes) setSelectedClasses(classes.split(','));
+    }, []);
+
 
     const updateURLQuery = (grade, classes) => {
         const query = new URLSearchParams(searchParams.toString());
@@ -154,11 +154,13 @@ const AllStudents = () => {
         fetchClasses();
     }, []);
 
-    const handleGradeSelect = (grade) => {
-        setSelectedGrade(grade);
+    const handleGradeSelect = (gradeText) => {
+        const numericGrade = parseInt(gradeText); // "1-sinflar" => 1
+        setSelectedGrade(numericGrade);
         setSelectedClasses([]);
-        updateURLQuery(grade, []);
+        updateURLQuery(numericGrade, []);
     };
+
 
     const toggleClassSelection = (className) => {
         setSelectedClasses(prev => {
@@ -202,10 +204,10 @@ const AllStudents = () => {
                     delete updated[className];
                 }
             } else {
-                updated[className] = [...existing, studentId]; // Yangi array bilan qayta belgilash
+                updated[className] = [...existing, studentId];
             }
 
-            return { ...updated }; // qayta nusxa qaytarish
+            return { ...updated }; 
         });
     };
 
@@ -217,13 +219,13 @@ const AllStudents = () => {
             if (isAllSelected) {
                 delete updated[className];
             } else {
-                updated[className] = [...studentIds]; // ❗️Yangi array bilan
+                updated[className] = [...studentIds];
             }
 
-            return { ...updated }; // ❗️Re-render uchun yangi object
+            return { ...updated };
         });
     };
-
+  
     function formatToDDMMYYYY(dateString) {
         if (!dateString || !dateString.includes("-")) return dateString;
         const [year, month, day] = dateString.split("-");
@@ -236,7 +238,10 @@ const AllStudents = () => {
                 isStatus={editStudent}
                 student={editStudent}
                 onClose={() => setEditStudent(null)}
-                onSuccess={() => getStudentsAgain()}
+                onSuccess={(updatedStudent) => {
+                    setStudentsList(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+                    setEditStudent(null); // modalni yopish
+                }}
             />
             <div className="all-classes">
                 <h2>Maktabdagi barcha sinflar</h2>
@@ -249,7 +254,7 @@ const AllStudents = () => {
                                 classNumbers.map(num => (
                                     <button
                                         key={num.id}
-                                        className={selectedGrade === num.class_number ? 'active' : ''}
+                                        className={selectedGrade === parseInt(num.class_number) ? 'active' : ''}
                                         onClick={() => handleGradeSelect(num.class_number)}
                                     >
                                         {num.class_number}

@@ -33,7 +33,7 @@ const AddQuestion = ({ isStatus, setIsStatus, initialData = null }) => {
     useEffect(() => {
         if (initialData) {
             setFormData({
-                question_name: initialData.name || '',
+                question_name: initialData.text || '', // <--- bu yerda `.text` ishlating
                 section: initialData.section || '',
             });
         } else {
@@ -63,8 +63,8 @@ const AddQuestion = ({ isStatus, setIsStatus, initialData = null }) => {
                 await updateData(
                     `${process.env.NEXT_PUBLIC_TESTS_API}/test/questions/${initialData.id}/`,
                     {
-                        name: formData.question_name,
-                        section: formData.section,
+                        text: formData.question_name,
+                        section_id: formData.section,
                     }
                 );
                 showNewNotification("Savol muvaffaqiyatli yangilandi!", "success");
@@ -80,11 +80,11 @@ const AddQuestion = ({ isStatus, setIsStatus, initialData = null }) => {
 
                 if (!response.ok) throw new Error("Savol yaratishda xatolik!");
                 showNewNotification("Savol muvaffaqiyatli qo‘shildi!", "success");
+                window.location.reload(); // yoki parentdan fetch qiling
             }
 
             setFormData({ question_name: '', section: '' });
             setIsStatus(false);
-            window.location.reload(); // yoki parentdan fetch qiling
         } catch (err) {
             setError(err.message);
             showNewNotification("Jarayonda xatolik yuz berdi!", "error");

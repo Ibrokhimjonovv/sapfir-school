@@ -1,525 +1,206 @@
+// AddTestForm.jsx
 'use client';
 
-import React, { useState, useEffect, useContext } from "react";
-import "./page.scss";
-import { AccessContext } from "@/contexts/contexts";
-import { useMask } from '@react-input/mask';
-import { api } from "@/config";
-import TestsList from "@/components/adminPanel/all-tests/all-tests";
-const CreateTest = () => {
-  const [categories, setCategories] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [sciences, setSciences] = useState([]);
-  const [formData, setFormData] = useState({
-    category: "",
-    title: "",
-    price: "",
-    score: "",
-    time: "00:30:00",
-    sciences: [],
-    departmentQuestionCounts: [],
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [testsCanvas, setTestsCanvas] = useState(false);
-  const [testCards, setTestCards] = useState([]);
-  const { profileData } = useContext(AccessContext)
+import React, { useEffect, useState, useContext } from 'react';
+import { AccessContext } from '@/contexts/contexts';
 
-  const addTestCard = () => {
-    setTestCards([
-      ...testCards,
-      {
-        science: "",
-        scienceScore: "",
-        selectedDepartments: [], // Yangi struktura - tanlangan bo'limlar va ularning savollar soni
-      },
-    ]);
-  };
+const AddTestForm = () => {
+    const { showNewNotification } = useContext(AccessContext);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const [categoriesRes, departmentsRes, sciencesRes] = await Promise.all([
-  //         fetch(`${api}/api/category/`),
-  //         fetch(`${api}/api/departments/`),
-  //         fetch(`${api}/api/sciences/`),
-  //       ]);
+    // Test form fields
+    const [testForm, setTestForm] = useState({
+        name: '',
+        tests_time: 0,
+        end_time: 0,
+        class_number: '',
+        created_date: new Date().toISOString().slice(0, 10),
+        created_time: new Date().toLocaleTimeString('it-IT'),
+        category: '',
+    });
 
-  //       if (!categoriesRes.ok || !departmentsRes.ok || !sciencesRes.ok)
-  //         throw new Error("Ma'lumotlarni olishda xato yuz berdi.");
+    const [testConfigs, setTestConfigs] = useState([]);
+    const [subjects, setSubjects] = useState([]);
+    const [sections, setSections] = useState([]);
+    const [categories, setCategories] = useState([]);
 
-  //       const categoriesData = await categoriesRes.json();
-  //       const departmentsData = await departmentsRes.json();
-  //       const sciencesData = await sciencesRes.json();
+    // Current config being added
+    const [newConfig, setNewConfig] = useState({
+        subject: '',
+        section: '',
+        question_count: '',
+    });
 
-  //       setCategories(categoriesData);
-  //       setDepartments(departmentsData);
-  //       setSciences(sciencesData);
-  //     } catch (error) {
-  //       console.error(error.message);
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+    useEffect(() => {
+        fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/subjects/`).then(res => res.json()).then(setSubjects);
+        fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/all-category/`).then(res => res.json()).then(data => setCategories(data.data));
+    }, []);
 
-  //   fetchData();
-  // }, []);
-
-
-  const handleCardChange = (index, key, value) => {
-    setTestCards((prevCards) =>
-      prevCards.map((card, i) =>
-        i === index
-          ? {
-            ...card,
-            [key]: value,
-            selectedDepartments: card.selectedDepartments || [],
-          }
-          : card
-      )
-    );
-  };
-
-  const handleDepartmentToggle = (cardIndex, department) => {
-    setTestCards((prevCards) =>
-      prevCards.map((card, i) => {
-        if (i !== cardIndex) return card;
-
-        const existingIndex = card.selectedDepartments.findIndex(
-          (d) => d.department_id === department.id
-        );
-
-        let updatedDepartments;
-        if (existingIndex >= 0) {
-          // Bo'lim allaqachon tanlangan, uni olib tashlaymiz
-          updatedDepartments = card.selectedDepartments.filter(
-            (d) => d.department_id !== department.id
-          );
+    useEffect(() => {
+        if (newConfig.subject) {
+            fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/sections/?subject=${newConfig.subject}`)
+                .then(res => res.json()).then(setSections);
         } else {
-          // Yangi bo'lim qo'shamiz
-          updatedDepartments = [
-            ...card.selectedDepartments,
-            {
-              department_id: department.id,
-              question_count: 1, // Default qiymat
-            },
-          ];
+            setSections([]);
         }
+    }, [newConfig.subject]);
 
-        return {
-          ...card,
-          selectedDepartments: updatedDepartments,
-        };
-      })
-    );
-  };
-
-  const handleQuestionCountChange = (cardIndex, departmentId, value) => {
-    setTestCards((prevCards) =>
-      prevCards.map((card, i) => {
-        if (i !== cardIndex) return card;
-
-        const updatedDepartments = card.selectedDepartments.map((d) =>
-          d.department_id === departmentId
-            ? { ...d, question_count: Math.max(1, parseInt(value) || 1) }
-            : d
-        );
-
-        return {
-          ...card,
-          selectedDepartments: updatedDepartments,
-        };
-      })
-    );
-  };
-
-  const [imageBase64, setImageBase64] = useState("");
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        setImageBase64(reader.result);
-      };
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.category) {
-      alert("Iltimos, kategoriya tanlang!");
-      return;
-    }
-    if (!formData.title.trim()) {
-      alert("Test nomini kiriting!");
-      return;
-    }
-    if (!formData.time || formData.time === "00:00:00") {
-      alert("Test uchun amal qilish vaqtini kiriting!");
-      return;
-    }
-
-    // Barcha tanlangan bo'limlar va savollar sonini yig'amiz
-    const allDepartmentQuestionCounts = testCards.flatMap((card) =>
-      card.selectedDepartments.map((d) => ({
-        department_id: parseInt(d.department_id),
-        question_count: parseInt(d.question_count),
-      }))
-    );
-
-    if (allDepartmentQuestionCounts.length === 0) {
-      alert("Hech bo'lmaganda bitta bo'lim va savollar sonini kiriting!");
-      return;
-    }
-
-    // Fanlarni unique qilamiz
-    const uniqueSciences = [
-      ...new Set(
-        testCards
-          .map((card) => parseInt(card.science) || 0)
-          .filter((id) => id > 0)
-      ),
-    ];
-
-    // Har bir fan uchun ballarni yig'amiz (agar kiritilgan bo'lsa)
-    const scienceScores = testCards
-      .filter((card) => card.science && card.scienceScore)
-      .map((card) => ({
-        science_id: parseInt(card.science),
-        score: parseInt(card.scienceScore),
-      }));
-
-    // APIga yuboriladigan so'rov tuzilmasini Postmandagiga moslaymiz
-    const requestBody = {
-      title: formData.title,
-      category: parseInt(formData.category),
-      science: uniqueSciences,
-      science_score: scienceScores.length > 0 ? scienceScores : [], // Agar ball kiritilmagan bo'lsa bo'sh massiv
-      score: parseInt(formData.score) || 0,
-      department_question_counts: allDepartmentQuestionCounts,
-      time: formData.time.length === 5 ? `${formData.time}:00` : formData.time, // Vaqt formatini to'g'rilash
-      price: formData.price,
-      img: imageBase64 || "", // Bo'sh string yuborish
-      questions: [], // Bo'sh savollar massivi
+    const handleTestChange = (e) => {
+        const { name, value } = e.target;
+        setTestForm(prev => ({ ...prev, [name]: value }));
     };
 
-    console.log("Yuborilayotgan ma'lumot:", JSON.stringify(requestBody, null, 2)); // Debug uchun
+    const handleConfigChange = (e) => {
+        const { name, value } = e.target;
+        setNewConfig(prev => ({ ...prev, [name]: value }));
+    };
 
-    try {
-      const response = await fetch(`${api}/api/tests/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Agar kerak bo'lsa, authorization header qo'shing
-          // 'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Server xatosi:", errorData);
-        throw new Error(errorData.message || "Testni yaratishda xato yuz berdi.");
-      }
-
-      const data = await response.json();
-      console.log("Server javobi:", data);
-      alert(`Test muvaffaqiyatli yaratildi: ${data.title}`);
-
-      // Formani tozalash
-      setFormData({
-        category: "",
-        title: "",
-        score: "",
-        price: "",
-        sciences: [],
-        time: "00:30:00",
-        departmentQuestionCounts: [],
-      });
-      setTestCards([]);
-      setImageBase64("");
-      setTestsCanvas(false);
-
-    } catch (error) {
-      console.error("Xato tafsilotlari:", error);
-      alert("Xato yuz berdi: " + error.message);
-    }
-  };
-
-  const handleSelectAllDepartments = (cardIndex) => {
-    setTestCards((prevCards) =>
-      prevCards.map((card, i) => {
-        if (i !== cardIndex) return card;
-
-        // Agar hamma bo'limlar allaqachon tanlangan bo'lsa, ularni olib tashlaymiz
-        if (card.selectedDepartments.length > 0) {
-          return {
-            ...card,
-            selectedDepartments: [],
-          };
+    const addConfig = () => {
+        if (!newConfig.subject || !newConfig.section || !newConfig.question_count) {
+            showNewNotification("Barcha config maydonlarini to‘ldiring!", "warning");
+            return;
         }
 
-        // Aks holda, barcha tegishli bo'limlarni qo'shamiz
-        const relevantDepartments = departments.filter(
-          (d) => Number(d.science) === Number(card.science)
+        const exists = testConfigs.find(
+            c => c.subject === newConfig.subject && c.section === newConfig.section
         );
 
-        const newDepartments = relevantDepartments.map((department) => ({
-          department_id: department.id,
-          question_count: 1, // Har biriga 1 ta savol
-        }));
+        if (exists) {
+            showNewNotification("Bu fan va bo‘lim kombinatsiyasi allaqachon qo‘shilgan!", "error");
+            return;
+        }
 
-        return {
-          ...card,
-          selectedDepartments: newDepartments,
-        };
-      })
-    );
-  };
+        setTestConfigs(prev => [...prev, newConfig]);
+        setNewConfig({ subject: '', section: '', question_count: '' });
+    };
 
-  const timeInputRef = useMask({
-    mask: '__:__:__',
-    replacement: { _: /\d/ },
-    showMask: true,
-    separate: true,
-  });
+    const removeConfig = (index) => {
+        setTestConfigs(prev => prev.filter((_, i) => i !== index));
+    };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    if (name === 'time') {
-      // Vaqt formati tekshiriladi (00:00:00)
-      const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
-      if (value.length === 8 && !timeRegex.test(value)) {
-        return; // Noto'g'ri format kiritilganda o'zgartirishni amalga oshirmaymiz
-      }
-    }
+        try {
+            // 1. Asosiy testni yaratish
+            const testRes = await fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/tests/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: testForm.name,
+                    tests_time: Number(testForm.tests_time),
+                    end_time: Number(testForm.end_time),
+                    class_number: testForm.class_number,
+                    created_at: `${testForm.created_date}T${testForm.created_time}`,
+                    category: testForm.category,
+                }),
+            });
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+            if (!testRes.ok) throw new Error("Testni yaratishda xatolik");
+            const test = await testRes.json();
 
-  // if (!profileData || !profileData.is_superuser) {
-  //   return <NotFound />
-  // }
+            // 2. Har bir configni yuborish
+            for (let config of testConfigs) {
+                const confRes = await fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/test-configs/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        test_id: test.id,
+                        subject_id: config.subject,
+                        section_id: config.section,
+                        question_count: Number(config.question_count),
+                    }),
+                });
 
+                if (!confRes.ok) {
+                    const err = await confRes.json();
+                    console.error("Xatolik:", err);
+                    throw new Error("Test config qo‘shishda muammo");
+                }
+            }
 
-  return (
-    <div className="create-test">
-      <div className="add-tests">
-        <button onClick={() => setTestsCanvas(!testsCanvas)}>
-          Test qo'shish +
-        </button>
-      </div>
-      <>
-        <div
-          className={`create-tests-offcanvas ${testsCanvas ? "active" : ""}`}
-        >
-          <form onSubmit={handleSubmit}>
-            <h2>Test Yaratish</h2>
-            <div className="one-row">
-              <div className="input-row">
-                <label>Kategoriya:</label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="" disabled>
-                    Kategoriyani tanlang
-                  </option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.title}
-                    </option>
-                  ))}
+            showNewNotification("Test va konfiguratsiyalar muvaffaqiyatli qo‘shildi!", "success");
+
+            // Reset
+            setTestForm({
+                name: '', tests_time: 0, end_time: 0, class_number: '',
+                created_date: new Date().toISOString().slice(0, 10),
+                created_time: new Date().toLocaleTimeString('it-IT'),
+                category: ''
+            });
+            setTestConfigs([]);
+
+        } catch (err) {
+            showNewNotification(err.message, "error");
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="add-test-form">
+            <h2>Add test</h2>
+
+            <label>Name:</label>
+            <input type="text" name="name" value={testForm.name} onChange={handleTestChange} />
+
+            <label>Tests time:</label>
+            <input type="number" name="tests_time" value={testForm.tests_time} onChange={handleTestChange} />
+
+            <label>End time:</label>
+            <input type="number" name="end_time" value={testForm.end_time} onChange={handleTestChange} />
+
+            <label>Class number:</label>
+            <input type="text" name="class_number" value={testForm.class_number} onChange={handleTestChange} />
+
+            <label>Created date:</label>
+            <input type="date" name="created_date" value={testForm.created_date} onChange={handleTestChange} />
+
+            <label>Time:</label>
+            <input type="time" name="created_time" value={testForm.created_time} onChange={handleTestChange} />
+
+            <label>Category:</label>
+            <select name="category" value={testForm.category} onChange={handleTestChange}>
+                <option value="">Tanlang</option>
+                {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+            </select>
+
+            <h3>TEST CONFIGS</h3>
+
+            <div className="test-configs-table">
+                <select name="subject" value={newConfig.subject} onChange={handleConfigChange}>
+                    <option value="">Fan</option>
+                    {subjects.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
                 </select>
-              </div>
-              <div className="input-row">
-                <label>Test nomi:</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="Test nomini kiriting"
-                  required
-                />
-              </div>
-              <div className="input-row">
-                <label>Test uchun rasm:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </div>
-              <div className="input-row">
-                <label>O'tish bali:</label>
-                <input
-                  type="number"
-                  name="score"
-                  value={formData.score}
-                  onChange={handleInputChange}
-                  placeholder="O'tish balini kiriting"
-                  required
-                />
-              </div>
-              <div className="input-row">
-                <label>Test vaqti (soat, minut):</label>
-                <input
-                  ref={timeInputRef}
-                  type="text"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleInputChange}
-                  placeholder="00:00:00"
-                  required
-                />
-              </div>
-              <div className="input-row">
-                <label>Test narxi:</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  placeholder="Test narxini kiriting"
-                  required
-                />
-              </div>
+
+                <select name="section" value={newConfig.section} onChange={handleConfigChange}>
+                    <option value="">Bo‘lim</option>
+                    {sections.map(sec => (
+                        <option key={sec.id} value={sec.id}>{sec.name}</option>
+                    ))}
+                </select>
+
+                <input type="number" name="question_count" placeholder="Savollar soni"
+                       value={newConfig.question_count} onChange={handleConfigChange} />
+
+                <button type="button" onClick={addConfig}>+</button>
             </div>
-            <div className="tests-cards">
-              {testCards.map((card, index) => (
-                <div key={index} className="test-card">
-                  <div className="input-row">
-                    <label htmlFor="">Fan tanlang</label>
-                    <select
-                      value={card.science}
-                      onChange={(e) => {
-                        const newValue = e.target.value;
-                        handleCardChange(index, "science", newValue);
-                      }}
-                    >
-                      <option value="" disabled>
-                        Fan tanlang
-                      </option>
-                      {sciences.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="input-row">
-                    <label htmlFor="">Fan uchun ball</label>
-                    <input
-                      type="number"
-                      placeholder="Fan uchun ballni kiriting"
-                      value={card.scienceScore}
-                      onChange={(e) =>
-                        handleCardChange(
-                          index,
-                          "scienceScore",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="input-row">
-                    <label>Bo'limlar tanlang</label>
-                    <button
-                      type="button"
-                      className="select-all-btn"
-                      onClick={() => handleSelectAllDepartments(index)}
-                    >
-                      {card.selectedDepartments.length > 0 ?
-                        "Barchasini bekor qilish" :
-                        "Barchasini tanlash (1 ta savol)"}
-                    </button>
-                    {departments
-                      .filter((d) => Number(d.science) === Number(card.science))
-                      .map((department) => (
-                        <div key={department.id} className="department-item">
-                          <div className="department-department-item">
-                            <input
-                              id={`dep-${index}-${department.id}`}
-                              type="checkbox"
-                              checked={card.selectedDepartments.some(
-                                (d) => d.department_id === department.id
-                              )}
-                              onChange={() =>
-                                handleDepartmentToggle(index, department)
-                              }
-                            />
-                            <label htmlFor={`dep-${index}-${department.id}`}>
-                              {department.title}
-                            </label>
-                          </div>
-                          {card.selectedDepartments.some(
-                            (d) => d.department_id === department.id
-                          ) && (
-                              <input
-                                type="number"
-                                min="1"
-                                value={
-                                  card.selectedDepartments.find(
-                                    (d) => d.department_id === department.id
-                                  )?.question_count || 1
-                                }
-                                onChange={(e) =>
-                                  handleQuestionCountChange(
-                                    index,
-                                    department.id,
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="Savollar soni"
-                              />
-                            )}
-                        </div>
-                      ))}
-                    <div className="total-questions">
-                      <strong>Jami savollar soni: </strong>
-                      {card.selectedDepartments.reduce(
-                        (sum, d) => sum + (d.question_count || 0),
-                        0
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <button
-                id="add-sciences"
-                type="button"
-                onClick={addTestCard}
-              >
-                Fan qo'shish
-              </button>
-            </div>
-            <div className="btns">
-              <button
-                type="button"
-                onClick={() => {
-                  setTestsCanvas(false);
-                }}
-              >
-                Bekor qilish
-              </button>
-              <button type="submit" className="submit-btn">
-                Testni Yaratish
-              </button>
-            </div>
-          </form>
-        </div>
-        {testsCanvas && <div className="create-tests-offcanvas-shape"></div>}
-        <TestsList />
-      </>
-    </div>
-  );
+
+            <ul>
+                {testConfigs.map((cfg, i) => (
+                    <li key={i}>
+                        ✅ Fan: {subjects.find(s => s.id == cfg.subject)?.name}, 
+                        Bo‘lim: {sections.find(sec => sec.id == cfg.section)?.name}, 
+                        Savollar: {cfg.question_count}
+                        <button type="button" onClick={() => removeConfig(i)}>❌</button>
+                    </li>
+                ))}
+            </ul>
+
+            <button type="submit">Testni Saqlash</button>
+        </form>
+    );
 };
 
-export default CreateTest;
+export default AddTestForm;

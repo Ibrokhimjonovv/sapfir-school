@@ -57,24 +57,20 @@ export default function TestsLayout() {
   const { setLoginStat, profileData, setProfileData, showNewNotification } = useContext(AccessContext)
   const [error, setError] = useState('')
   const [stLoading, setStLoading] = useState(false);
+  const [cachedTests, setCachedTests] = useState({});
+  const [rotateDirections, setRotateDirections] = useState({});
+  const [animActive, setAnimActive] = useState({})
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch categories
         const categoriesRes = await fetch('/site/categories');
         const categoriesData = await categoriesRes.json();
-
-        // Safely handle categories data
-        const categoriesArray = Array.isArray(categoriesData?.data.data) ? categoriesData.data.data : [];
-        setCategories(categoriesArray);
-        
-        // Fetch tests
+        const categoriesArray = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
         const testsRes = await fetch('/site/tests');
         const testsData = await testsRes.json();
-
-        // Safely handle tests data
-        const testsArray = Array.isArray(testsData?.data) ? testsData.data : [];
+        const testsArray = testsData.data;
+        setCategories(categoriesArray);
         setTests({ tests: testsArray });
         setFilteredTests({ tests: testsArray });
       } catch (error) {
@@ -86,7 +82,6 @@ export default function TestsLayout() {
         setLoading(false);
       }
     }
-
     fetchData();
   }, []);
 
@@ -96,34 +91,48 @@ export default function TestsLayout() {
 
   useEffect(() => {
     if (!pathname || loading) return;
-
     const currentCategory = pathname.split('/').pop();
-
     if (pathname === '/tests/all' || pathname === '/tests') {
       setActiveButton('all');
       setFilteredTests(tests);
     } else if (currentCategory) {
       setActiveButton(currentCategory);
       const category = categories.find(cat =>
-        formatCategoryLink(cat.category_title) === currentCategory
+        formatCategoryLink(cat.name) === currentCategory
       );
-
       if (category) {
-        const filtered = tests.tests.filter(test => test.category === category.id);
-        setFilteredTests({ tests: filtered });
-        document.title = `${category.category_title} - Infinite Co`;
+        handleCategoryClick(category.id, category.name);
+        document.title = `${category.name} - SAPFIR School`;
       }
     }
   }, [pathname, categories, tests, loading]);
-
-  function handleCategoryClick(categoryId, category_title) {
-    const formattedLink = formatCategoryLink(category_title);
+  async function handleCategoryClick(categoryId, name) {
+    const formattedLink = formatCategoryLink(name);
     setActiveButton(formattedLink);
-    const filtered = tests.tests.filter(test => test.category === categoryId);
-    setFilteredTests({ tests: filtered });
     router.push('/tests/' + formattedLink);
-  }
+    if (cachedTests[categoryId]) {
+      setFilteredTests({ tests: cachedTests[categoryId] });
+      return;
+    }
 
+    try {
+      setLoading(true);
+      const res = await fetch(`http://37.27.23.255:8004/test/get-test-by-subject-id/?category_id=${categoryId}`);
+      if (!res.ok) {
+        console.error(`Server returned status ${res.status}`);
+        setFilteredTests({ tests: [] });
+        return;
+      }
+      const data = await res.json();
+      setFilteredTests({ tests: data });
+      setCachedTests(prev => ({ ...prev, [categoryId]: data }));
+    } catch (err) {
+      console.error("Kategoriya bo‘yicha testlar yuklanmadi:", err);
+      setFilteredTests({ tests: [] });
+    } finally {
+      setLoading(false);
+    }
+  }
   function handleAllClick() {
     setActiveButton('all');
     router.push('/tests/all');
@@ -144,18 +153,12 @@ export default function TestsLayout() {
   const startTest = async () => {
     setStLoading(true);
     try {
-      const token = localStorage.getItem("accessEdu");
+      const token = localStorage.getItem("sapfirAccess");
       if (!token) {
-        showNewNotification("Token yo'q", "error");
+        showNewNotification("Token yo'q, Xisobingizga qayta kiring", "error");
         return;
       }
-
-      setProfileData(prev => ({
-        ...prev,
-        balance: prev.balance - selectedTest.price
-      }));
-
-      const response = await fetch(`${api}/edu_maktablar/start-test/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/start-test/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -163,23 +166,19 @@ export default function TestsLayout() {
         },
         body: JSON.stringify({
           test_id: selectedTest.id,
+          user_id: profileData.id,
         }),
       });
 
       if (response.ok) {
         showNewNotification("Test muvaffaqiyatli boshlandi!", "success", true);
-        router.push(`/tests/${formatTestName(selectedTest.title)}/${selectedTest.id}`);
+        router.push(`/tests/${formatTestName(selectedTest.name)}/${selectedTest.id}`);
       } else {
         const errorData = await response.json();
         showNewNotification(
-          "Balansingizda mablag' yetarli emas!",
+          errorData,
           "error"
         );
-
-        setProfileData(prev => ({
-          ...prev,
-          balance: prev.balance + selectedTest.price
-        }));
         setError(errorData.detail);
       }
     } catch (error) {
@@ -192,10 +191,8 @@ export default function TestsLayout() {
 
   function formatTestTime(timeString) {
     if (!timeString) return "Vaqt cheklanmagan";
-
     if (typeof timeString === 'string' && timeString.match(/^\d{1,2}:\d{2}:\d{2}$/)) {
       const [hours, minutes] = timeString.split(':').map(Number);
-
       if (hours > 0 && minutes > 0) {
         return `${hours} soat ${minutes} daqiqa`;
       } else if (hours > 0) {
@@ -222,7 +219,6 @@ export default function TestsLayout() {
         return `${minutes} daqiqa`;
       }
     }
-
     return "Vaqt cheklanmagan";
   }
 
@@ -236,6 +232,29 @@ export default function TestsLayout() {
     );
   }
 
+  const handleMouseEnter = (id) => {
+    const randomDirection = Math.random() < 0.5 ? 'left' : 'right';
+    setRotateDirections(prev => ({
+      ...prev,
+      [id]: randomDirection
+    }));
+    setAnimActive(prev => ({
+      ...prev,
+      [id]: "active"
+    }))
+  };
+
+  const handleMouseLeave = (id) => {
+    setRotateDirections(prev => ({
+      ...prev,
+      [id]: null
+    }));
+    setAnimActive(prev => ({
+      ...prev,
+      [id]: null
+    }))
+  };
+
   return (
     <div className='tests-page'>
       <h1 className='page-title'>Testlar</h1>
@@ -248,14 +267,14 @@ export default function TestsLayout() {
         </button>
         {Array.isArray(categories) && categories.length > 0 ? (
           categories.map((category) => {
-            const formattedLink = formatCategoryLink(category.title);
+            const formattedLink = formatCategoryLink(category.name);
             return (
               <button
                 key={category.id}
                 className={activeButton === formattedLink ? 'active' : ''}
-                onClick={() => handleCategoryClick(category.id, category.title)}
+                onClick={() => handleCategoryClick(category.id, category.name)}
               >
-                {category.title}
+                {category.name}
                 {category.isNew && <div className="new active">Yangi</div>}
               </button>
             );
@@ -267,40 +286,45 @@ export default function TestsLayout() {
 
       <div className="tests-content">
         {Array.isArray(filteredTests?.tests) && filteredTests.tests.length > 0 ? (
-          filteredTests.tests.map((test) => (
-            <div
-              className="test-card"
-              key={test.id}
-              onClick={() => handleTestClick(test)}
-            >
-              <div className="card-top">
-                <div className="card-top-top">
-                  <img
-                    src={test.testImage || "https://cdn.testbor.com/0/quiz-category/01JPMA7KTREH7RMB957PAQG926.png"}
-                    alt={test.title || "Test rasmi"}
-                    onError={(e) => {
-                      e.target.src = "https://cdn.testbor.com/0/quiz-category/01JPMA7KTREH7RMB957PAQG926.png";
-                    }}
-                  />
-                  {test.isNew && <div className="new active">Yangi</div>}
+          filteredTests.tests.map((test, indx) => {
+            const direction = rotateDirections[test.id];
+
+            return (
+              <div
+                className="test-card"
+                key={test.id}
+                onClick={() => handleTestClick(test)}
+                onMouseEnter={() => handleMouseEnter(test.id)}
+                onMouseLeave={() => handleMouseLeave(test.id)}
+              >
+                <div className="card-top">
+                  <div className="card-top-top">
+                    <div className={`card-number ${direction === 'left' ? 'rotate-left' :
+                      direction === 'right' ? 'rotate-right' : ''
+                      }`}>
+                      {indx + 1}
+                    </div>
+                    {test.isNew && <div className="new active">Yangi</div>}
+                  </div>
+                  <div className={`card-top-bottom ${animActive[test.id] === 'active' ? "active" : ""}`}>
+                    <p className='test-count'><span></span> {test.question_count} ta savol</p>
+                    <p className='test-time'><span></span> {formatTestTime(test.tests_time) || "0 daqiqa"}</p>
+                    <p className='test-title'>{test.name || "Test nomi"}</p>
+                  </div>
                 </div>
-                <div className="card-top-bottom">
-                  <p>{test.title || "Test nomi"}</p>
-                  <p>{test.testDescription || "Test tavsifi"}</p>
+                <div className="card-bottom">
+                  <button onMouseEnter={() => handleMouseEnter(test.id)}
+                    onMouseLeave={() => handleMouseLeave(test.id)}>
+                    <span>Testni boshlash</span>
+                    <span>Hoziroq boshlang</span>
+                  </button>
                 </div>
               </div>
-              <div className="card-bottom">
-                <p className={`${test.price === "Bepul" ? "" : "green"}`}>
-                  {test.price === 0 ? "Bepul" : `${test.price} UZS`}
-                </p>
-                <span></span>
-                {formatTestTime(test.time) || "0 daqiqa"}   
-              </div>
-            </div>
-          ))
+            )
+          })
         ) : (
           <div className="no-tests">
-            <p>Ushbu kategoriyada testlar mavjud emas</p>
+            <p>Ushbu fanda testlar mavjud emas</p>
           </div>
         )}
       </div>
@@ -311,9 +335,8 @@ export default function TestsLayout() {
             <h2>{selectedTest.title}</h2>
             <p>{selectedTest.testDescription}</p>
             <div className="test-details">
-              <p><span>Savollar soni:</span> {selectedTest.tests_count || "Mavjud emas"}</p>
-              <p><span>Vaqt:</span> {formatTestTime(selectedTest.time)}</p>
-              <p><span>Narxi:</span> {selectedTest.price} UZS</p>
+              <p><span>Savollar soni:</span> {selectedTest.question_count + " ta" || "Mavjud emas"}</p>
+              <p><span>Vaqt:</span> {formatTestTime(selectedTest.tests_time)}</p>
             </div>
             <div className="modal-actions">
               <button className="cancel-button" onClick={() => setShowModal(false)}>

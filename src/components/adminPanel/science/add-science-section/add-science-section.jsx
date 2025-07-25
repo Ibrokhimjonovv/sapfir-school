@@ -27,7 +27,7 @@ const AddScienceSection = ({ isStatus, setIsStatus, initialData = null }) => {
     fetchSubjects();
   }, []);
 
-  // initialData mavjud bo'lsa, formani to'ldirish
+  // initialData mavjud bo'lsa, formani to' ldirish
   useEffect(() => {
     if (initialData) {
       setFormData({

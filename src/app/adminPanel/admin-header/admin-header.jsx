@@ -68,7 +68,7 @@ const AdminHeader = () => {
               </Link>
               <div className="box">
                 <Link href="/adminPanel/sciences">Fan qo'shish</Link>
-                <Link href="/adminPanel/add-test">Test qo'shish</Link>
+                <Link href="/adminPanel/tests">Test qo'shish</Link>
               </div>
             </div>
             <div className="menu">

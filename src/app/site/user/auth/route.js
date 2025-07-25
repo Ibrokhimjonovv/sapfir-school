@@ -1,16 +1,16 @@
 export async function POST(request) {
   try {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+    const API_BASE = process.env.NEXT_PUBLIC_STUDENT_CREATE;
     const body = await request.json();
     
     // Validation
-    if (!body.login || !body.password) {
+    if (!body.username || !body.password) {
       return Response.json({ error: 'Login va parol kiritilishi shart' }, {
         status: 400
       });
     }
 
-    const response = await fetch(`${API_BASE}/user/auth/`, {
+    const response = await fetch(`${API_BASE}/students/login/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

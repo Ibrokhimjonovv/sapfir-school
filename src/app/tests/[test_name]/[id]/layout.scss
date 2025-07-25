@@ -434,34 +434,16 @@
   width: 25%;
 
   .closer {
-    display: none !important; 
+    display: none !important;
   }
 
-  .subject-section {
-    margin-bottom: 15px;
-
-    .subject-header {
-      margin-bottom: 10px;
-
-      h3 {
-        font-size: 16px;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        .question-count {
-          font-size: 14px;
-          color: #666;
-          font-weight: normal;
-        }
-      }
-    }
-
-    .subject-questions {
+  .questions-section {
+    
+    .tracker-questions {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      margin-top: 5px;
 
       .circle {
         width: 32px;
@@ -524,7 +506,6 @@
     }
   }
 }
-
 
 @media screen and (max-width: 500px) {
   .test-container {

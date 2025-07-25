@@ -15,7 +15,7 @@ export default function Notification({ text, type, onClose, isActive }) {
         <div className={`notification ${type} ${isActive ? "active" : ""}`}>
             <div className="notification-content">
                 <span className="notification-title">
-                    {type === 'error' ? 'Xatolik' : 'Muvaffaqiyatli'}
+                    {type === 'error' ? 'Xatolik' : type === "warning" ? "Ogohlantirish" : 'Muvaffaqiyatli'}
                 </span>
                 <p>{text}</p>
             </div>

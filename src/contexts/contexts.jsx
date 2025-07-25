@@ -27,17 +27,30 @@ const AccessProvider = ({ children }) => {
             try {
                 const token = localStorage.getItem("sapfirAccess");
                 const userTypeLocalStorage = localStorage.getItem("sapfirType");
-                const userType = userTypeLocalStorage === "user"
-                    ? "/site/me"
-                    : `${process.env.NEXT_PUBLIC_ADMIN_API}/get-superuser-data/`
+                const studentId = localStorage.getItem("sapfirUser");
 
-                const response = await fetch(userType, {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                });
+                let response;
+
+                if (userTypeLocalStorage === "user") {
+                    // Agar oddiy user bo‘lsa: POST so‘rov
+                    response = await fetch(`${process.env.NEXT_PUBLIC_STUDENT_CREATE}/students/get-student-data/`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ student_id: Number(studentId) }),
+                    });
+                } else {
+                    // Agar admin bo‘lsa: GET so‘rov
+                    response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API}/get-superuser-data/`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    });
+                }
 
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -52,8 +65,11 @@ const AccessProvider = ({ children }) => {
                 setProfileLoading(false);
             }
         };
+
         fetchProfile();
     }, []);
+
+
 
     const [notification, setNotification] = useState(null);
     const [showNotification, setShowNotification] = useState(false);

@@ -1,30 +1,29 @@
-import { NextResponse } from 'next/server';
+export async function POST(request) {
+    const API_BASE = process.env.NEXT_PUBLIC_STUDENT_CREATE;
 
-
-export async function GET(request) {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL;
-    
     try {
         const authHeader = request.headers.get('authorization');
-        
-        if (!authHeader) {
+        const body = await request.json();
+        const studentId = body.student_id;
+
+        if (!authHeader || !studentId) {
             return NextResponse.json(
-                { error: "Authorization header missing" },
-                { status: 401 }
+                { error: "Token yoki student_id yo'q" },
+                { status: 400 }
             );
         }
 
-        // Asl backend API manziliga so'rov
-        const backendResponse = await fetch(`${API_BASE}/user/profile/`, { // Bu ham frontenddagi bilan bir xil bo'lishi kerak
+        const backendResponse = await fetch(`${API_BASE}/students/get-student-data/`, {
+            method: "POST",
             headers: {
-                Authorization: authHeader, // Bearer bilan birga
+                Authorization: authHeader,
                 "Content-Type": "application/json",
             },
+            body: JSON.stringify({ student_id: studentId }),
         });
 
         if (!backendResponse.ok) {
             const errorText = await backendResponse.text();
-            console.error("Backend error:", errorText); // Debug
             return NextResponse.json(
                 { error: errorText },
                 { status: backendResponse.status }
@@ -34,7 +33,6 @@ export async function GET(request) {
         const data = await backendResponse.json();
         return NextResponse.json(data);
     } catch (error) {
-        console.error("API route error:", error); // Debug
         return NextResponse.json(
             { error: error.message },
             { status: 500 }
