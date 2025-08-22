@@ -43,7 +43,7 @@ const AccessProvider = ({ children }) => {
                     });
                 } else {
                     // Agar admin bo‘lsa: GET so‘rov
-                    response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API}/get-superuser-data/`, {
+                    response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API}/supper_users/get-superuser-data/`, {
                         method: "GET",
                         headers: {
                             Authorization: `Bearer ${token}`,
