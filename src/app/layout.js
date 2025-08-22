@@ -5,6 +5,7 @@ import "@/styles/global.scss"
 import Login from "@/components/login/page";
 import Register from "@/components/register/page";
 import HeaderSwitcher from "@/components/headerSwitcher/headerSwitcher";
+import Footer from "@/components/footer/footer";
 
 const poppins = Poppins({
   weight: ['400', '500'],
@@ -26,7 +27,7 @@ export default function RootLayout({ children }) {
           <Login />
           <Register />
           {children}
-          <main></main>
+          <Footer />
         </body>
       </html>
     </AccessProvider>

@@ -1,0 +1,40 @@
+.about-us {
+    padding: 20px 90px;
+
+    .about-texts {
+        p {
+            &.title {
+                span {
+                    font-weight: 600;
+                    color: #f26225;
+                }
+            }
+            &.fontwe-500 {
+                font-weight: 500;
+                margin-top: 5px;
+            }
+        }
+        ul {
+            margin-left: 10px;
+            
+            li {
+                margin-top: 5px;
+                span {
+                    color: #f26225;
+                    text-decoration: underline;
+                }
+            }
+        }
+
+        .last-words {
+            margin-top: 5px;
+            span {
+                font-weight: 500;
+            }
+        }
+    }
+
+    .school-conditions {
+        margin-top: 10px;
+    }
+}

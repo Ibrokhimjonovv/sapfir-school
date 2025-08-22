@@ -42,7 +42,7 @@ const Header = () => {
                 <Link href="/tests/all" className={pathname === '/tests/all' ? "act" : ""}>Testlar</Link>
               </li>
               <li>
-                <Link href="/learn" className={pathname === '/learn' ? "act" : ""}>O'rganish</Link>
+                <Link href="/about-us" className={pathname === '/about-us' ? "act" : ""}>Biz haqimizda</Link>
               </li>
               <li>
                 <Link href="/contests" className={pathname === '/contests' ? "act" : ""}>Musobaqalar</Link>
