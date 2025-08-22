@@ -108,7 +108,7 @@ const Login = () => {
 
             const userType = type === 'user'
                 ? `${process.env.NEXT_PUBLIC_STUDENT_CREATE}/students/login/`
-                : `${process.env.NEXT_PUBLIC_ADMIN_API}/login/`
+                : `${process.env.NEXT_PUBLIC_ADMIN_API}/supper_users/login/`
 
             const response = await fetch(userType, {
                 method: 'POST',
