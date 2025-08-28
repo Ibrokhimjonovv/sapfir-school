@@ -117,7 +117,7 @@ export default function TestsLayout() {
 
     try {
       setLoading(true);
-      const res = await fetch(`http://37.27.23.255:8004/test/get-test-by-subject-id/?category_id=${categoryId}`);
+      const res = await fetch(`https://test.smartcoders.uz/student_test/test/get-test-by-subject-id/?category_id=${categoryId}`);
       if (!res.ok) {
         console.error(`Server returned status ${res.status}`);
         setFilteredTests({ tests: [] });

@@ -37,7 +37,7 @@ export default function TestComponent() {
 
   useEffect(() => {
     const fetchTestData = async () => {
-      if (!profileData?.id || !testId) return; // oldini olish uchun
+      if (!profileData?.id || !testId) return; 
 
       try {
         const token = localStorage.getItem("sapfirAccess");
@@ -196,12 +196,8 @@ export default function TestComponent() {
   const finishTest = async () => {
     try {
       let finalScore = 0;
-
-      // Prepare answers data with validation
       const answersData = [];
       const validatedAnswers = {};
-
-      // First validate all answers
       for (const [index, answerId] of Object.entries(selectedAnswers)) {
         const questionIndex = parseInt(index);
         const question = questions[questionIndex];
@@ -217,13 +213,10 @@ export default function TestComponent() {
           continue;
         }
 
-        // Count correct answers
         const correctOption = question.options.find(opt => opt.is_correct);
         if (correctOption && answerId === correctOption.id) {
           finalScore++;
         }
-
-        // Add to validated answers
         answersData.push({
           question_id: question.id,
           option_id: answerId,
@@ -232,24 +225,21 @@ export default function TestComponent() {
         validatedAnswers[questionIndex] = answerId;
       }
 
-      // Calculate time metrics
       const totalTimeTaken = currentTest.testTime * 60 - timeLeft;
       const timePerQuestion = totalTimeTaken / questions.length;
 
-      // Prepare statistics data
-      const resultData = {
-        user: profileData?.id,
-        test_title: currentTest?.title || "Test",
-        correct_answers: finalScore,
-        incorrect_answers: questions.length - finalScore,
-        unanswered_questions: questions.length - Object.keys(validatedAnswers).length,
-        total_questions: questions.length,
-        percentage_correct: ((finalScore / questions.length) * 100).toFixed(2),
-        total_time_taken: totalTimeTaken,
-        time_per_question: { 1: 1 },
-      };
+      // const resultData = {
+      //   user: profileData?.id,
+      //   test_title: currentTest?.title || "Test",
+      //   correct_answers: finalScore,
+      //   incorrect_answers: questions.length - finalScore,
+      //   unanswered_questions: questions.length - Object.keys(validatedAnswers).length,
+      //   total_questions: questions.length,
+      //   percentage_correct: ((finalScore / questions.length) * 100).toFixed(2),
+      //   total_time_taken: totalTimeTaken,
+      //   time_per_question: { 1: 1 },
+      // };
 
-      // Send requests
       const [finishResponse] = await Promise.all([
         // fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/edu_maktablar/statistics/`, {
         //   method: "POST",
@@ -290,7 +280,7 @@ export default function TestComponent() {
       console.log("Finish result:", finishResult);
 
       setScore(finalScore);
-      setTestResult(finishResult); // <-- yangi qo‘shilgan
+      setTestResult(finishResult);
       setTestStatus('completed');
 
     } catch (error) {

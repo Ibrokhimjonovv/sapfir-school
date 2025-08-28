@@ -32,7 +32,7 @@ const AccessProvider = ({ children }) => {
                 let response;
 
                 if (userTypeLocalStorage === "user") {
-                    // Agar oddiy user bo‘lsa: POST so‘rov
+                    // Agar oddiy user b'‘lsa: POST so‘rov
                     response = await fetch(`${process.env.NEXT_PUBLIC_STUDENT_CREATE}/students/get-student-data/`, {
                         method: "POST",
                         headers: {
@@ -42,7 +42,7 @@ const AccessProvider = ({ children }) => {
                         body: JSON.stringify({ student_id: Number(studentId) }),
                     });
                 } else {
-                    // Agar admin bo‘lsa: GET so‘rov
+                    // Agar admin bo'lsa: GET so‘rov
                     response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API}/supper_users/get-superuser-data/`, {
                         method: "GET",
                         headers: {
@@ -74,7 +74,6 @@ const AccessProvider = ({ children }) => {
     const [notification, setNotification] = useState(null);
     const [showNotification, setShowNotification] = useState(false);
 
-    // ✅ Bildirishnomani ko‘rsatish funksiyasi
     const showNewNotification = (text, type, options = {}) => {
         const { persist = false, reloadAfter = false } = options;
         const newNotification = {
@@ -82,7 +81,7 @@ const AccessProvider = ({ children }) => {
             type,
             timestamp: Date.now(),
             extendedLifetime: reloadAfter,
-            shown: false // ⬅️ faqat bir marta ko‘rsatish uchun
+            shown: false
         };
 
         setNotification(newNotification);
@@ -111,14 +110,12 @@ const AccessProvider = ({ children }) => {
         return () => clearTimeout(timer);
     };
 
-    // ✅ Faqat bir marta bildirishnoma chiqarish uchun
     useEffect(() => {
         const checkForNotifications = () => {
             const storedNotification = localStorage.getItem('pendingNotification');
             if (storedNotification) {
                 const parsedNotification = JSON.parse(storedNotification);
 
-                // Agar allaqachon ko‘rsatilgan bo‘lsa – chiqmasin
                 if (parsedNotification.shown) return;
 
                 const maxAge = parsedNotification.extendedLifetime ? 30000 : 10000;
@@ -127,7 +124,6 @@ const AccessProvider = ({ children }) => {
                     setNotification(parsedNotification);
                     setShowNotification(true);
 
-                    // Belgilaymiz: endi ko‘rsatilgan
                     parsedNotification.shown = true;
                     localStorage.setItem('pendingNotification', JSON.stringify(parsedNotification));
 

@@ -3,19 +3,19 @@ import parse from "html-react-parser";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 
-const Questions = ({ 
-  toggleZoom, 
-  currentQuestionIndex, 
-  currentQuestion, 
-  selectedOption, 
-  questions, 
-  setSelectedOption, 
-  setScore, 
-  setCurrentQuestionIndex, 
-  setTestStatus, 
-  isZoomed, 
-  handleOptionSelect, 
-  finishTest 
+const Questions = ({
+    toggleZoom,
+    currentQuestionIndex,
+    currentQuestion,
+    selectedOption,
+    questions,
+    setSelectedOption,
+    setScore,
+    setCurrentQuestionIndex,
+    setTestStatus,
+    isZoomed,
+    handleOptionSelect,
+    finishTest
 }) => {
     const [zoomLevel, setZoomLevel] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -361,7 +361,12 @@ const Questions = ({
                         <div
                             key={option.id}
                             className={`option ${selectedOption === option.id ? 'selected' : ''}`}
-                            onClick={() => handleOptionSelect(option.id)}
+                            onClick={() => {
+                                handleOptionSelect(option.id); // variantni belgilash
+                                setTimeout(() => {
+                                    handleNextQuestion(); // avtomatik keyingi savolga o‘tish
+                                }, 300); // 0.3 soniya kutish (foydalanuvchi tanlaganini ko‘rsin)
+                            }}
                             dangerouslySetInnerHTML={{
                                 __html: `<strong class="chart">${String.fromCharCode(
                                     65 + index
@@ -370,6 +375,7 @@ const Questions = ({
                                 )}`,
                             }}
                         />
+
                     ))}
                 </div>
 

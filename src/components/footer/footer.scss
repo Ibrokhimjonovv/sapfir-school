@@ -69,3 +69,27 @@
     }
   }
 }
+
+
+@media screen and (max-width: 749px) {
+  .footer {
+    .footer-inner {
+      flex-direction: column;
+      text-align: center;
+      padding: 20px 45px;
+
+      .footer-containers {
+        align-items: center !important;
+        margin-top: 20px;
+
+        p {
+          font-size: 15px;
+        }
+
+        .hrefs {
+          font-size: 15px;
+        }
+      }
+    }
+  } 
+}
