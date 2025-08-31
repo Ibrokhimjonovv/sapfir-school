@@ -27,22 +27,31 @@ const AccessProvider = ({ children }) => {
             try {
                 const token = localStorage.getItem("sapfirAccess");
                 const userTypeLocalStorage = localStorage.getItem("sapfirType");
-                const studentId = localStorage.getItem("sapfirUser");
+                const userId = localStorage.getItem("sapfirUser");
 
                 let response;
 
                 if (userTypeLocalStorage === "user") {
-                    // Agar oddiy user b'‘lsa: POST so‘rov
+                    // Oddiy user (talaba)
                     response = await fetch(`${process.env.NEXT_PUBLIC_STUDENT_CREATE}/students/get-student-data/`, {
                         method: "POST",
                         headers: {
                             Authorization: `Bearer ${token}`,
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ student_id: Number(studentId) }),
+                        body: JSON.stringify({ student_id: Number(userId) }),
+                    });
+                } else if (userTypeLocalStorage === "teacher") {
+                    // O‘qituvchi
+                    response = await fetch(`https://test.smartcoders.uz/teachers/teacher/profile/`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
                     });
                 } else {
-                    // Agar admin bo'lsa: GET so‘rov
+                    // Admin
                     response = await fetch(`${process.env.NEXT_PUBLIC_ADMIN_API}/supper_users/get-superuser-data/`, {
                         method: "GET",
                         headers: {
@@ -58,7 +67,7 @@ const AccessProvider = ({ children }) => {
                 }
 
                 const data = await response.json();
-                setProfileData(data.data);
+                setProfileData(data.data ?? data);
             } catch (error) {
                 console.error("Failed to fetch profile data:", error.message);
             } finally {
@@ -68,6 +77,7 @@ const AccessProvider = ({ children }) => {
 
         fetchProfile();
     }, []);
+
 
 
 

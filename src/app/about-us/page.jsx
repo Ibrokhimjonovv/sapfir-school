@@ -17,7 +17,7 @@ const AboutUs = () => {
         </ul>
         <p className='last-words'><span>Maqsadimiz</span> — farzandingizni kelajakda mas’uliyatli, bilimli, va o‘z yo‘lini topgan inson sifatida tarbiyalash.</p>
       </div>
-        <h3 className='school-conditions'>Maktab sharoitlari:</h3>
+        <h3 className='school-conditions'>Makta b sharoitlari:</h3>
     </div>
   )
 }

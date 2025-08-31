@@ -58,6 +58,10 @@
       right: 15px;
       top: 15px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(90deg);
     }
 
     .logo {
@@ -95,31 +99,23 @@
       position: relative;
       min-height: 50px;
 
-      .slide-type {
-        width: 48.5%;
-        height: 80%;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background-color: #ff8a00;
-        border-radius: 15px;
-        transition: all .2s;
-        color: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 2;
-        
-        &.left {
-          left: 5px;
-        }
+      // .slide-type {
+      //   width: 48.5%;
+      //   height: 80%;
+      //   position: absolute;
+      //   top: 50%;
+      //   transform: translateY(-50%);
+      //   background-color: #ff8a00;
+      //   border-radius: 15px;
+      //   transition: all .2s;
+      //   color: #fff;
+      //   display: flex;
+      //   justify-content: center;
+      //   align-items: center;
+      //   z-index: 2;
+      // }
 
-        &.right {
-          left: calc(50.5%);
-        }
-      }
-
-      .phone, .username {
+      .phone, .username, .teacher {
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -131,9 +127,9 @@
         transition: all .2s;
         overflow: hidden;
 
-
         &.act {
-          opacity: 0;
+          background-color: #ff8a00;
+          color: #fff;
         }
       }
     }

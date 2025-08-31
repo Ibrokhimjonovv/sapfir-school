@@ -97,7 +97,7 @@ const EditStudentModal = ({ student, onClose, onSuccess, isStatus }) => {
                     .then(data => {
                         const filteredDistricts = data.filter(d => d.region_id === regionObj.id);
                         setDistricts(filteredDistricts);
-                        const districtObj = filteredDistricts.find(d => d.name_uz === student.district);
+                        const districtObj = filteredDistricts.find(d => d.name_uz === student.district );
                         if (districtObj) {
                             setSelectedDistrict(String(districtObj.id));
                         }

@@ -19,7 +19,7 @@ export const updateData = async (url, data = {}, options = {}) => {
 
         return await response.json();
     } catch (error) {
-        console.error('updateData xatosi:', error);
+        console.error('updateData xatosi:', error);     
         throw error;
     }
 };
