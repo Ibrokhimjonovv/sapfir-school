@@ -9,7 +9,8 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
     const [formData, setFormData] = useState({
         class_number: '',
         class_name: '',
-        tg_number: '', // ✅ qo‘shildi
+        teacher_username: '',
+        tg_number: '', 
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -17,6 +18,7 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
     const { showNewNotification } = useContext(AccessContext);
 
     const [classNumbers, setClassNumbers] = useState([]);
+    const [teachers, setTeachers] = useState([]); // O'qituvchilar ro'yxati
 
     useEffect(() => {
         const fetchClassNumbers = async () => {
@@ -28,7 +30,19 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
                 console.error("Sinf raqamlarini yuklashda xatolik:", err);
             }
         };
+        
+        const fetchTeachers = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_TEACHER_API}/teachers/`);
+                const data = await res.json();
+                setTeachers(data || []);
+            } catch (err) {
+                console.error("O'qituvchilarni yuklashda xatolik:", err);
+            }
+        };
+        
         fetchClassNumbers();
+        fetchTeachers();
     }, []);
 
     useEffect(() => {
@@ -36,10 +50,11 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
             setFormData({
                 class_number: initialData.class_number,
                 class_name: initialData.class_name,
+                teacher_username: initialData.teacher_username,
                 tg_number: initialData.tg_number || '',
             });
         } else {
-            setFormData({ class_number: '', class_name: '', tg_number: '' });
+            setFormData({ class_number: '', teacher_username: "", class_name: '', tg_number: '' });
         }
     }, [initialData]);
 
@@ -48,6 +63,7 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
         let errors = {};
         if (!formData.class_number) errors.class_number = "Sinf raqami tanlanishi kerak!";
         if (!formData.class_name.trim()) errors.class_name = "Sinf harfi kiritilishi kerak!";
+        if (!formData.teacher_username.trim()) errors.teacher_username = "Sinf rahbari tanlanishi kerak!";
         if (!formData.tg_number.trim()) errors.tg_number = "Telegram raqami kiritilishi kerak!";
         setDetailsError(errors);
         return Object.keys(errors).length === 0;
@@ -78,7 +94,7 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
                 showNewNotification("Sinf qo'shish muvaffaqiyatli amalga oshirildi!", "success");
             }
 
-            setFormData({ class_number: '', class_name: '' });
+            setFormData({ class_number: '', class_name: '', teacher_username: '', tg_number: '' });
             setIsStatus(false);
             window.location.reload();
         } catch (error) {
@@ -118,6 +134,22 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
                             {detailsError.class_number && <span>{detailsError.class_number}</span>}
                         </div>
                         <div className="input-row">
+                            <select
+                                name="teacher_username"
+                                value={formData.teacher_username}
+                                onChange={handleChange}
+                                className={!formData.teacher_username ? "disabled" : ""}
+                            >
+                                <option value="">Sinf rahbarini tanlang</option>
+                                {teachers.map(teacher => (
+                                    <option key={teacher.id} value={teacher.username}>
+                                        {teacher.first_name} {teacher.last_name} - {teacher.username}
+                                    </option>
+                                ))}
+                            </select>
+                            {detailsError.teacher_username && <span>{detailsError.teacher_username}</span>}
+                        </div>
+                        <div className="input-row">
                             <input
                                 type="text"
                                 name="class_name"
@@ -149,10 +181,11 @@ const AddClassName = ({ isStatus, setIsStatus, initialData = null }) => {
                                         setFormData({
                                             class_number: initialData.class_number,
                                             class_name: initialData.class_name,
+                                            teacher_username: initialData.teacher_username,
                                             tg_number: initialData.tg_number || '',
                                         });
                                     } else {
-                                        setFormData({ class_number: '', class_name: '', tg_number: '' });
+                                        setFormData({ class_number: '', class_name: '', teacher_username: '', tg_number: '' });
                                     }
                                 }}
                             >

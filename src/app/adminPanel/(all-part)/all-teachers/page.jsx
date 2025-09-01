@@ -1,9 +1,12 @@
 import React from 'react';
 import "./page.scss";
+import TeachersWithClasses from '@/components/adminPanel/all-teachers/all-teachers';
 
 const AllTeachers = () => {
   return (
-    <div>Barcha o'qituvchilar ro'yxati</div>
+    <div className='all-teachers'>
+      <TeachersWithClasses />
+    </div>
   )
 }
 
