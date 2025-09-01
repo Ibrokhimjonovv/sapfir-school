@@ -66,9 +66,6 @@ const ClassesTable = () => {
             });
 
             const data = await res.json();
-            console.log('====================================');
-            console.log(data);
-            console.log('====================================');
 
             setExpandedClasses(prev => ({ ...prev, [number]: data.classes || [] }));
             setExpanded(number);
@@ -94,9 +91,6 @@ const ClassesTable = () => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_STUDENT_CREATE}/students/class-students/?class_name=${encodeURIComponent(className)}`);
             const data = await res.json();
-            console.log('====================================');
-            console.log(data);
-            console.log('====================================');
 
             setStudentsByClass(prev => ({
                 ...prev,
