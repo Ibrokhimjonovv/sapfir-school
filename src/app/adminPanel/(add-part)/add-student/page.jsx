@@ -255,11 +255,12 @@ const AddStudent = () => {
   });
   // Next uchun tug'ulgan sana formati
   const birthDateRef = useMask({
-    mask: '99.99.9999',
-    replacement: { 9: /\d/ },
+    mask: '##.##.####',
+    replacement: { '#': /\d/ },
     showMask: false,
     separate: true,
   });
+
 
   const fetchClassNamesByNumber = async (classNumberId) => {
     try {
