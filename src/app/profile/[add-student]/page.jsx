@@ -34,7 +34,10 @@ const AddStudent = () => {
 
   const fatherNumberRef = useMask({ mask: '+998 (__) ___-__-__', replacement: { _: /\d/ } });
   const motherNumberRef = useMask({ mask: '+998 (__) ___-__-__', replacement: { _: /\d/ } });
-  const birthDateRef = useMask({ mask: '99.99.9999', replacement: { 9: /\d/ } });
+  const birthDateRef = useMask({ mask: '##.##.####',
+    replacement: { '#': /\d/ },
+    showMask: false,
+    separate: true, });
 
   useEffect(() => {
     if (profileData?.user_type === "teacher") {
