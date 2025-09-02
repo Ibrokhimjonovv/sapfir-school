@@ -3,6 +3,7 @@ import { useMask } from '@react-input/mask';
 import React, { useContext, useEffect, useState } from 'react'
 import "./page.scss";
 import { AccessContext } from '@/contexts/contexts';
+import NotFound from '@/app/not-found';
 
 const AddStudent = () => {
   const { profileData, showNewNotification } = useContext(AccessContext);
@@ -180,6 +181,9 @@ const AddStudent = () => {
       showNewNotification("Server bilan bog'lanishda xatolik!", "error");
     }
   };
+
+
+  if(profileData?.user_type != "teacher") return <NotFound />
 
   return (
     <div className='add-student-container'>
