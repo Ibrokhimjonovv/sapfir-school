@@ -1,4 +1,4 @@
-#profile-section {
+#profile-section-students {
   width: 100%;
   min-height: 100vh;
   // background-image: linear-gradient(to right bottom, #fff, rgb(221, 221, 121));
@@ -74,7 +74,7 @@
     justify-content: space-between;
   }
 
-  .top-line {
+  .top-line-student {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     margin-top: 15px;
@@ -293,6 +293,47 @@
         font-size: 20px;
         text-align: center;
       }
+    }
+  }
+}
+
+@media screen and (max-width: 749px) {
+  #profile-section-students {
+    .edit-profile {
+      .edit-profile-content {
+        width: 90%;
+      }
+    }
+
+    .welcome-text {
+      font-size: 20px;
+      align-items: center;
+    }
+    .top-line-student {
+      grid-template-columns: repeat(1, 1fr);
+
+      .profile-card, .class-rank-card, .school-rank-card {
+        height: 250px;
+      }
+    }
+    .middle-line {
+      grid-template-columns: repeat(1, 1fr);
+    
+      .monthly-class-chart, .monthly-school-chart {
+        .line {
+          justify-content: flex-start;
+
+          p {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+
+  .profile-sciences {
+    .title-p {
+      text-align: center;
     }
   }
 }

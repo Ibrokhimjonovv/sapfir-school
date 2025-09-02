@@ -21,8 +21,8 @@ const AddTeacher = () => {
 
   // Tug'ilgan sana maskasi
   const birthDateRef = useMask({
-    mask: '99.99.9999',
-    replacement: { 9: /\d/ },
+    mask: '##.##.####',
+    replacement: { '#': /\d/ },
     showMask: false,
     separate: true,
   });
@@ -108,45 +108,45 @@ const AddTeacher = () => {
         <div className="student-details">
           <form onSubmit={handleSubmit} autoComplete="off">
 
-          <div className="input-row">
-            <input type="text" placeholder="Ism *" name="first_name" value={formData.first_name} onChange={handleChange} />
-            {detailsError.first_name && <span>{detailsError.first_name}</span>}
-          </div>
-          <div className="input-row">
-            <input type="text" placeholder="Familiya *" name="last_name" value={formData.last_name} onChange={handleChange} />
-            {detailsError.last_name && <span>{detailsError.last_name}</span>}
-          </div>
-          <div className="input-row">
-            <input type="text" placeholder="Foydalanuvchi nomi *" name="username" value={formData.username} onChange={handleChange} />
-            {detailsError.username && <span>{detailsError.username}</span>}
-          </div>
-          <div className="input-row">
-            <input ref={birthDateRef} type="tel" placeholder="Tug'ilgan sanasi (DD.MM.YYYY) *" />
-            {detailsError.birth_day && <span>{detailsError.birth_day}</span>}
-          </div>
-          <div className="input-row">
-            <input ref={phoneNumberRef} type="tel" name="phone_number" value={formData.phone_number} onChange={handleChange} placeholder="Telefon raqami *" />
-            {detailsError.phone_number && <span>{detailsError.phone_number}</span>}
-          </div>
-          <div className="input-row">
-            <input type="text" placeholder="Sinf nomi *" name="class_name" value={formData.class_name} onChange={handleChange} />
-            {detailsError.class_name && <span>{detailsError.class_name}</span>}
-          </div>
-          <div className="input-row">
-            <input type="password" placeholder="Parol *" name="password" value={formData.password} onChange={handleChange} />
-            {detailsError.password && <span>{detailsError.password}</span>}
-          </div>
-          <div className="input-row">
-            <input type="password" placeholder="Parolni takrorlang *" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
-            {detailsError.confirmPassword && <span>{detailsError.confirmPassword}</span>}
-          </div>
+            <div className="input-row">
+              <input type="text" placeholder="Ism *" name="first_name" value={formData.first_name} onChange={handleChange} />
+              {detailsError.first_name && <span>{detailsError.first_name}</span>}
+            </div>
+            <div className="input-row">
+              <input type="text" placeholder="Familiya *" name="last_name" value={formData.last_name} onChange={handleChange} />
+              {detailsError.last_name && <span>{detailsError.last_name}</span>}
+            </div>
+            <div className="input-row">
+              <input type="text" placeholder="Foydalanuvchi nomi *" name="username" value={formData.username} onChange={handleChange} />
+              {detailsError.username && <span>{detailsError.username}</span>}
+            </div>
+            <div className="input-row">
+              <input ref={birthDateRef} type="tel" placeholder="Tug'ilgan sanasi (DD.MM.YYYY) *" />
+              {detailsError.birth_day && <span>{detailsError.birth_day}</span>}
+            </div>
+            <div className="input-row">
+              <input ref={phoneNumberRef} type="tel" name="phone_number" value={formData.phone_number} onChange={handleChange} placeholder="Telefon raqami *" />
+              {detailsError.phone_number && <span>{detailsError.phone_number}</span>}
+            </div>
+            <div className="input-row">
+              <input type="text" placeholder="Sinf nomi *" name="class_name" value={formData.class_name} onChange={handleChange} />
+              {detailsError.class_name && <span>{detailsError.class_name}</span>}
+            </div>
+            <div className="input-row">
+              <input type="password" placeholder="Parol *" name="password" value={formData.password} onChange={handleChange} />
+              {detailsError.password && <span>{detailsError.password}</span>}
+            </div>
+            <div className="input-row">
+              <input type="password" placeholder="Parolni takrorlang *" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
+              {detailsError.confirmPassword && <span>{detailsError.confirmPassword}</span>}
+            </div>
 
-          <div className="input-row register-submit-button">
-            <button type="submit" disabled={loading}>
-              {loading ? "Yuklanmoqda..." : "Ro'yxatdan o'tkazish"}
-            </button>
-          </div>
-        </form>
+            <div className="input-row register-submit-button">
+              <button type="submit" disabled={loading}>
+                {loading ? "Yuklanmoqda..." : "Ro'yxatdan o'tkazish"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

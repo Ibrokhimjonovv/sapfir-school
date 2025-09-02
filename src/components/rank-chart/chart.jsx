@@ -135,3 +135,5 @@ const LineChart = ({ year = new Date().getFullYear(), data = [] }) => {
 };
 
 export default LineChart;
+
+

@@ -102,3 +102,17 @@
     }
   }
 }
+
+
+@media screen and (max-width: 749px) {
+.student-edit-modal-content {
+  width: 100%;
+
+  form {
+
+    .input-row {
+      width: 100%;
+    }
+  }
+} 
+}

@@ -90,3 +90,27 @@
     }
   }
 }
+
+
+@media screen and (max-width: 749px) {
+  #logout-main-btn {
+    border: 1px solid #ef520f;
+    padding: 10px 15px;
+    font-size: 13px;
+
+    &:hover {
+      background-color: #ef520f;
+      color: #fff;
+    }
+  }
+
+  .logout-modal {
+    .logout-modal-content {
+      width: 90%;
+
+      p {
+        font-size: 15px;
+      }
+    }
+  }
+}

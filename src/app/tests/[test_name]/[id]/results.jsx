@@ -14,13 +14,12 @@ const Results = ({
 }) => {
     const router = useRouter();
 
-    // Calculate correct answers based on selectedAnswers
     const calculateScore = () => {
         let correctAnswers = 0;
         questions.forEach((question, index) => {
             const userAnswerId = selectedAnswers?.[index];
             const correctOption = question.options.find(opt => opt.is_correct);
-            if (userAnswerId && correctOption && userAnswerId === correctOption.id) {
+            if (userAnswerId != null && correctOption && userAnswerId === correctOption.id) {
                 correctAnswers++;
             }
         });
@@ -151,9 +150,10 @@ const Results = ({
         return text;
     };
 
-    const actualScore = resultData?.correct_answers || 0;
-    const totalAnswers = resultData?.total_answers || 0;
-    const incorrectAnswers = resultData?.incorrect_answers || 0;
+
+    const actualScore = calculateScore();                // nechta to‘g‘ri
+    const totalAnswers = questions.length;               // jami savollar
+    const incorrectAnswers = totalAnswers - actualScore; // noto‘g‘ri
     const percentage = Math.round((actualScore / totalAnswers) * 100);
 
     return (

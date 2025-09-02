@@ -41,7 +41,6 @@ const TeacherClasses = () => {
         return <p>❌ Bu sahifa faqat o‘qituvchilar uchun!</p>;
     }
 
-    // 🔹 Sinflarni class_number bo‘yicha guruhlash
     const groupedClasses = classes.reduce((acc, cls) => {
         const number = cls.class_number;
         if (!acc[number]) acc[number] = [];
@@ -57,7 +56,6 @@ const TeacherClasses = () => {
     };
 
     const toggleClass = async (className) => {
-        // Agar o‘quvchilar hali yuklanmagan bo‘lsa API dan olib kelamiz
         if (!studentsByClass[className]) {
             setLoadingStudents((prev) => ({ ...prev, [className]: true }));
             try {
@@ -73,16 +71,14 @@ const TeacherClasses = () => {
                 setLoadingStudents((prev) => ({ ...prev, [className]: false }));
             }
         } else {
-            // Agar allaqachon bor bo‘lsa → yopib/ochib qo‘yamiz
             setStudentsByClass((prev) => {
                 const newState = { ...prev };
-                delete newState[className]; // qayta bosilganda yashirib qo‘yish
+                delete newState[className];
                 return newState;
             });
         }
     };
 
-    // 🔹 O‘quvchini o‘chirish
     const handleDeleteStudent = async (studentId, className) => {
         try {
             const res = await fetch(
@@ -132,7 +128,7 @@ const TeacherClasses = () => {
                 onClose={() => setEditStudent(null)}
                 onSuccess={(updatedStudent) => {
                     // setStudentsList(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
-                    setEditStudent(null); // modalni yopish
+                    setEditStudent(null); 
                 }}
             />
             <h2>Mening sinflarim</h2>

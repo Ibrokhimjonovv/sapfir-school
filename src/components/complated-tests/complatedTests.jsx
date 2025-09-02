@@ -31,7 +31,7 @@ const ProfileScienceResult = () => {
             {
                 tests.map((testItem, indx) => (
                     <div className="test-item" key={indx}>
-                        <p><span>{testItem.complatedDate}</span> da yechilgan test natijalari</p>
+                        <p className='complated-test-date'><span>{testItem.complatedDate}</span> da yechilgan test natijalari</p>
                         <div className="test-item-details">
                             <div className="test-item-details-container">
                                 <span>Test nomi:</span>

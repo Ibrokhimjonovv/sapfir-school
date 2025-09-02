@@ -181,3 +181,50 @@
     }
   }
 }
+
+@media screen and (max-width: 749px) {
+  #profile-section {
+    .edit-profile {
+      .edit-profile-content {
+        width: 90%;
+      }
+    }
+
+    .welcome-text {
+      font-size: 20px;
+      align-items: center;
+    }
+    .top-line {
+      grid-template-columns: repeat(1, 1fr);
+
+      .profile-card {
+        height: 250px;
+      }
+
+      .add-student-card {
+        h2 {
+          font-size: 20px;
+        }
+      }
+    }
+    .middle-line {
+      grid-template-columns: repeat(1, 1fr);
+    
+      .monthly-class-chart, .monthly-school-chart {
+        .line {
+          justify-content: flex-start;
+
+          p {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+
+  .profile-sciences {
+    .title-p {
+      text-align: center;
+    }
+  }
+}

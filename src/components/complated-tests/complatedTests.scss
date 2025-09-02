@@ -60,3 +60,16 @@
     margin: 15px auto;
   }
 }
+
+@media screen and (max-width: 749px) {
+  .profile-science-result {
+    .test-item {
+      .complated-test-date {
+        text-align: center;
+      }
+      .test-item-details {
+        grid-template-columns: repeat(1, 1fr);
+      }
+    }
+  }
+}

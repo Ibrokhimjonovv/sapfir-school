@@ -261,7 +261,6 @@ const AddStudent = () => {
     separate: true,
   });
 
-
   const fetchClassNamesByNumber = async (classNumberId) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_CLASSESS_API}/classes/get-classes-by-number/`, {
