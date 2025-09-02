@@ -59,6 +59,28 @@
     border-top: 1px dashed #ea641e;
     margin: 15px auto;
   }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+
+    button {
+      width: 30px;
+      height: 30px;
+      border: 2px solid #ea641e;
+      background-color: transparent;
+      cursor: pointer;
+      font-size: 15px;
+      border-radius: 10px;
+      color: #ea641e;
+      
+      &.active, &:hover {
+        color: #fff;
+        background-color: #ea641e;
+      }
+    }
+  }
 }
 
 @media screen and (max-width: 749px) {

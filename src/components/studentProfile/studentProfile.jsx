@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import "./studentProfile.scss";
 import Waves from "@/components/rankCard/rank-card";
 import LineChart from "@/components/rank-chart/chart";
-import ScienceTest from "@/components/scienceTestResults/science-test";
 import Logout from "@/components/logout/logout";
+import ProfileScienceResult from "../complated-tests/complatedTests";
 
 const sampleStats = {
   2022: [3, 4, 7, 2, 1, 5, 6, 2, 1, 4, 3, 2],
@@ -151,7 +151,7 @@ const StudentProfile = ({ profileData }) => {
       {/* Science results */}
       <div className="profile-sciences">
         <p className="title-p">Ishlangan testlar natijalari</p>
-        <ScienceTest />
+        <ProfileScienceResult studentId={profileData.id}/>
       </div>
     </section>
   );
