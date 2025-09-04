@@ -18,6 +18,8 @@ const Results = ({
         let correctAnswers = 0;
         questions.forEach((question, index) => {
             const userAnswerId = selectedAnswers?.[index];
+            console.log(userAnswerId);
+            
             const correctOption = question.options.find(opt => opt.is_correct);
             if (userAnswerId != null && correctOption && userAnswerId === correctOption.id) {
                 correctAnswers++;

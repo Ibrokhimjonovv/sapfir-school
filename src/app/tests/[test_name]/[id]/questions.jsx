@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import parse from "html-react-parser";
 import katex from "katex";
 import "katex/dist/katex.min.css";
@@ -10,9 +10,7 @@ const Questions = ({
     selectedOption,
     questions,
     setSelectedOption,
-    setScore,
     setCurrentQuestionIndex,
-    setTestStatus,
     isZoomed,
     handleOptionSelect,
     finishTest
@@ -24,6 +22,19 @@ const Questions = ({
     const imageRef = useRef(null);
     const containerRef = useRef(null);
     const [initialDistance, setInitialDistance] = useState(null);
+
+    const handleOptionSelectLocal = (optionId) => {
+        // Asosiy funksiyani chaqiramiz
+        handleOptionSelect(optionId);
+
+        // Local state ni yangilaymiz
+        setSelectedOption(optionId);
+
+        // Avtomatik keyingi savolga o'tish
+        setTimeout(() => {
+            handleNextQuestion();
+        }, 300);
+    };
 
     const handleZoomIn = (e) => {
         e.stopPropagation();
@@ -163,20 +174,21 @@ const Questions = ({
     };
 
     const handleNextQuestion = () => {
-        if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-            setSelectedOption(null);
-        } else {
-            finishTest();
-        }
-    };
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setSelectedOption(null);
+    } else {
+      finishTest();
+    }
+  };
 
-    const handlePrevQuestion = () => {
-        if (currentQuestionIndex > 0) {
-            setCurrentQuestionIndex(currentQuestionIndex - 1);
-            setSelectedOption(null);
-        }
-    };
+  // handlePrevQuestion funksiyasi
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      setSelectedOption(null);
+    }
+  };
 
     const fixBrokenImageTags = (text) => {
         return text.replace(
@@ -361,12 +373,7 @@ const Questions = ({
                         <div
                             key={option.id}
                             className={`option ${selectedOption === option.id ? 'selected' : ''}`}
-                            onClick={() => {
-                                handleOptionSelect(option.id); // variantni belgilash
-                                setTimeout(() => {
-                                    handleNextQuestion(); // avtomatik keyingi savolga o‘tish
-                                }, 300); // 0.3 soniya kutish (foydalanuvchi tanlaganini ko‘rsin)
-                            }}
+                            onClick={() => handleOptionSelectLocal(option.id)}
                             dangerouslySetInnerHTML={{
                                 __html: `<strong class="chart">${String.fromCharCode(
                                     65 + index

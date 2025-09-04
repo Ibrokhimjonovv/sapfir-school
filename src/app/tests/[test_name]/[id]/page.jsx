@@ -37,7 +37,7 @@ export default function TestComponent() {
 
   useEffect(() => {
     const fetchTestData = async () => {
-      if (!profileData?.id || !testId) return; 
+      if (!profileData?.id || !testId) return;
 
       try {
         const token = localStorage.getItem("sapfirAccess");
@@ -157,11 +157,17 @@ export default function TestComponent() {
     setTestStatus('timeout');
   };
 
-  const handleOptionSelect = (optionId) => {
-    setSelectedOption(optionId);
+  const selectedAnswersRef = useRef({});
+
+  // Yangi handleOptionSelect funksiyasini qo'shing
+  const handleOptionSelect = (questionIndex, optionId) => {
+    // useRef ga saqlash (tez kirish uchun)
+    selectedAnswersRef.current[questionIndex] = optionId;
+
+    // State ni yangilash (UI uchun)
     setSelectedAnswers(prev => ({
       ...prev,
-      [currentQuestionIndex]: optionId
+      [questionIndex]: optionId
     }));
   };
 
@@ -181,7 +187,6 @@ export default function TestComponent() {
       </div>
     </div>;
   }
-
   if (testStatus === 'completed' || testStatus === 'timeout') {
     return <Results
       questions={questions}
@@ -191,64 +196,35 @@ export default function TestComponent() {
       resultData={testResult}
     />
   }
-
-
   const finishTest = async () => {
     try {
       let finalScore = 0;
       const answersData = [];
-      const validatedAnswers = {};
-      for (const [index, answerId] of Object.entries(selectedAnswers)) {
-        const questionIndex = parseInt(index);
-        const question = questions[questionIndex];
 
-        if (!question) {
-          console.error(`Question not found at index ${questionIndex}`);
-          continue;
+      questions.forEach((question, index) => {
+        const answerId = selectedAnswersRef.current[index];
+        console.log('====================================');
+        console.log(answerId, 'asdas');
+        console.log('====================================');
+
+        if (!answerId) {
+          // agar foydalanuvchi savolga javob bermagan bo‘lsa ham yuboramiz
+          answersData.push({
+            question_id: question.id,
+            option_id: null, // yoki backend qabul qiladigan qiymat
+          });
+          return;
         }
 
-        const selectedOption = question.options.find(opt => opt.id === answerId);
-        if (!selectedOption) {
-          console.error(`Option ${answerId} not found in question ${question.id}`);
-          continue;
-        }
-
-        const correctOption = question.options.find(opt => opt.is_correct);
-        if (correctOption && answerId === correctOption.id) {
-          finalScore++;
-        }
         answersData.push({
           question_id: question.id,
           option_id: answerId,
         });
-
-        validatedAnswers[questionIndex] = answerId;
-      }
+      });
 
       const totalTimeTaken = currentTest.testTime * 60 - timeLeft;
       const timePerQuestion = totalTimeTaken / questions.length;
-
-      // const resultData = {
-      //   user: profileData?.id,
-      //   test_title: currentTest?.title || "Test",
-      //   correct_answers: finalScore,
-      //   incorrect_answers: questions.length - finalScore,
-      //   unanswered_questions: questions.length - Object.keys(validatedAnswers).length,
-      //   total_questions: questions.length,
-      //   percentage_correct: ((finalScore / questions.length) * 100).toFixed(2),
-      //   total_time_taken: totalTimeTaken,
-      //   time_per_question: { 1: 1 },
-      // };
-
       const [finishResponse] = await Promise.all([
-        // fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/edu_maktablar/statistics/`, {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //     "Authorization": `Bearer ${localStorage.getItem("sapfirAccess")}`
-        //   },
-        //   body: JSON.stringify(resultData),
-        // }),
         fetch(`${process.env.NEXT_PUBLIC_TESTS_API}/test/submit-answers/`, {
           method: "POST",
           headers: {
@@ -262,14 +238,6 @@ export default function TestComponent() {
           }),
         })
       ]);
-
-      // Handle responses
-      // if (!statsResponse.ok) {
-      //   const statsError = await statsResponse.json();
-      //   console.error("Statistics error:", statsError);
-      //   throw new Error("Natijalarni saqlashda xato yuz berdi");
-      // }
-
       if (!finishResponse.ok) {
         const finishError = await finishResponse.json();
         console.error("Finish error:", finishError);
@@ -287,6 +255,9 @@ export default function TestComponent() {
       console.error("Testni yakunlashda xato:", error);
     }
   };
+
+
+
 
   if (questions.length === 0) {
     return (
@@ -347,7 +318,7 @@ export default function TestComponent() {
           setTestStatus={setTestStatus}
           isZoomed={isZoomed}
           handleBackButton={handleBackButton}
-          handleOptionSelect={handleOptionSelect}
+           handleOptionSelect={(optionId) => handleOptionSelect(currentQuestionIndex, optionId)}
           finishTest={finishTest}
         />
       </div>
