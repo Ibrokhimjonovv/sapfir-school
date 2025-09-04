@@ -159,12 +159,9 @@ export default function TestComponent() {
 
   const selectedAnswersRef = useRef({});
 
-  // Yangi handleOptionSelect funksiyasini qo'shing
   const handleOptionSelect = (questionIndex, optionId) => {
-    // useRef ga saqlash (tez kirish uchun)
     selectedAnswersRef.current[questionIndex] = optionId;
 
-    // State ni yangilash (UI uchun)
     setSelectedAnswers(prev => ({
       ...prev,
       [questionIndex]: optionId
@@ -208,10 +205,9 @@ export default function TestComponent() {
         console.log('====================================');
 
         if (!answerId) {
-          // agar foydalanuvchi savolga javob bermagan bo‘lsa ham yuboramiz
           answersData.push({
             question_id: question.id,
-            option_id: null, // yoki backend qabul qiladigan qiymat
+            option_id: null,
           });
           return;
         }

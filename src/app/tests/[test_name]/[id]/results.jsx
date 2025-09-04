@@ -153,9 +153,9 @@ const Results = ({
     };
 
 
-    const actualScore = calculateScore();                // nechta to‘g‘ri
-    const totalAnswers = questions.length;               // jami savollar
-    const incorrectAnswers = totalAnswers - actualScore; // noto‘g‘ri
+    const actualScore = calculateScore();
+    const totalAnswers = questions.length;
+    const incorrectAnswers = totalAnswers - actualScore;
     const percentage = Math.round((actualScore / totalAnswers) * 100);
 
     return (

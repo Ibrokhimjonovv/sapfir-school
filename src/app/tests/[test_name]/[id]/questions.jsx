@@ -24,13 +24,8 @@ const Questions = ({
     const [initialDistance, setInitialDistance] = useState(null);
 
     const handleOptionSelectLocal = (optionId) => {
-        // Asosiy funksiyani chaqiramiz
         handleOptionSelect(optionId);
-
-        // Local state ni yangilaymiz
         setSelectedOption(optionId);
-
-        // Avtomatik keyingi savolga o'tish
         setTimeout(() => {
             handleNextQuestion();
         }, 300);
@@ -182,7 +177,6 @@ const Questions = ({
     }
   };
 
-  // handlePrevQuestion funksiyasi
   const handlePrevQuestion = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
