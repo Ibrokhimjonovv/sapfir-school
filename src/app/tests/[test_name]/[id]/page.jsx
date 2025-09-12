@@ -200,9 +200,6 @@ export default function TestComponent() {
 
       questions.forEach((question, index) => {
         const answerId = selectedAnswersRef.current[index];
-        console.log('====================================');
-        console.log(answerId, 'asdas');
-        console.log('====================================');
 
         if (!answerId) {
           answersData.push({
@@ -241,7 +238,6 @@ export default function TestComponent() {
       }
 
       const finishResult = await finishResponse.json();
-      console.log("Finish result:", finishResult);
 
       setScore(finalScore);
       setTestResult(finishResult);

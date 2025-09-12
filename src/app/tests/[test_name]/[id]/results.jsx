@@ -18,7 +18,6 @@ const Results = ({
         let correctAnswers = 0;
         questions.forEach((question, index) => {
             const userAnswerId = selectedAnswers?.[index];
-            console.log(userAnswerId);
             
             const correctOption = question.options.find(opt => opt.is_correct);
             if (userAnswerId != null && correctOption && userAnswerId === correctOption.id) {
@@ -177,6 +176,9 @@ const Results = ({
 
                         return (
                             <div key={question.id} className="question-review">
+                                <p className="question-text">
+                                    <strong>Mavzu:</strong> {parse(renderQuestionText(question.section_name))}
+                                </p>
                                 <p className="question-text">
                                     <strong>Savol {index + 1}:</strong> {parse(renderQuestionText(question.text))}
                                 </p>
