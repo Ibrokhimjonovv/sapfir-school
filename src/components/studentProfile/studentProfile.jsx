@@ -39,7 +39,6 @@ const StudentProfile = ({ profileData }) => {
           // Ma'lumotlarni qayta ishlash
           const processedStats = processRankStatistics(data.rank_statistics);
           setRankStatistics(processedStats);
-          console.log("API dan kelgan ma'lumotlar:", processedStats);
           
           // Mavjud yillarni olish
           const years = Object.keys(processedStats).map(year => parseInt(year)).sort();

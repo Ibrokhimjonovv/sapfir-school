@@ -33,8 +33,6 @@ const uzMonths = [
 const LineChart = ({ year = new Date().getFullYear(), data = [] }) => {
     const labels = uzMonths;
 
-    console.log('Chart ma\'lumotlari:', data);
-
     // Null qiymatlarni alohida ko'rsatish uchun
     const filledData = Array.from({ length: 12 }, (_, i) => data[i] ?? null);
     
