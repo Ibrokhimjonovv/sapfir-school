@@ -178,6 +178,10 @@
         &.bronze {
           filter: sepia(100%) brightness(80%) saturate(200%);
         }
+
+        &.op-0 {
+          opacity: 0;
+        }
       }
 
       p {
@@ -214,6 +218,10 @@
         width: 150px;
         z-index: 10;
         pointer-events: none;
+
+        &.op-0 {
+          opacity: 0;
+        }
 
         &.normal {
           background-image: url("/assets/image/crown.png");

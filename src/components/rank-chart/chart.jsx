@@ -33,22 +33,64 @@ const uzMonths = [
 const LineChart = ({ year = new Date().getFullYear(), data = [] }) => {
     const labels = uzMonths;
 
+    console.log('Chart ma\'lumotlari:', data);
+
+    // Null qiymatlarni alohida ko'rsatish uchun
     const filledData = Array.from({ length: 12 }, (_, i) => data[i] ?? null);
+    
+    // Null qiymatlar uchun alohida dataset yaratamiz
+    const nullData = filledData.map((value, index) => 
+        value === null ? 0 : null
+    );
 
     const chartData = {
         labels,
         datasets: [
             {
+                // Asosiy ma'lumotlar
                 data: filledData,
                 borderColor: '#ea641e',
                 backgroundColor: '#ffffffb9',
-                tension: 0,
+                tension: 0.4,
                 borderWidth: 2,
                 fill: false,
                 stepped: false,
+                pointBackgroundColor: filledData.map(val => 
+                    val !== null ? '#ea641e' : 'transparent'
+                ),
+                pointBorderColor: filledData.map(val => 
+                    val !== null ? '#ea641e' : 'transparent'
+                ),
+                pointRadius: filledData.map(val => 
+                    val !== null ? 4 : 0
+                ),
+                pointHoverRadius: filledData.map(val => 
+                    val !== null ? 6 : 0
+                ),
             },
+            {
+                // Null qiymatlar uchun ko'rinadigan nuqtalar
+                data: nullData,
+                borderColor: 'transparent',
+                backgroundColor: '#ccc',
+                pointBackgroundColor: filledData.map(val => 
+                    val === null ? '#ccc' : 'transparent'
+                ),
+                pointBorderColor: filledData.map(val => 
+                    val === null ? '#ccc' : 'transparent'
+                ),
+                pointRadius: filledData.map(val => 
+                    val === null ? 3 : 0
+                ),
+                pointHoverRadius: filledData.map(val => 
+                    val === null ? 5 : 0
+                ),
+                pointHoverBackgroundColor: '#999',
+                showLine: false, // Chiziqni ko'rsatmaslik
+            }
         ],
     };
+    
     const options = {
         responsive: true,
         plugins: {
@@ -72,7 +114,19 @@ const LineChart = ({ year = new Date().getFullYear(), data = [] }) => {
                         return `${year}-yil, ${uzMonths[context[0].dataIndex]}`;
                     },
                     label: function (context) {
-                        return `${context.parsed.y}-o‘rin`;
+                        if (context.datasetIndex === 0 && context.parsed.y !== null) {
+                            return `${context.parsed.y}-o‘rin`;
+                        } else if (context.datasetIndex === 1) {
+                            return "Ma'lumot mavjud emas";
+                        }
+                        return null;
+                    },
+                    afterBody: function(context) {
+                        // Faqat null qiymatlar uchun qo'shimcha ma'lumot
+                        if (context[0].datasetIndex === 1) {
+                            return ["Bu oy uchun reyting ma'lumoti mavjud emas"];
+                        }
+                        return null;
                     }
                 }
             },
@@ -107,7 +161,12 @@ const LineChart = ({ year = new Date().getFullYear(), data = [] }) => {
                 reverse: true,
                 min: 1,
                 max: 30,
-                ticks: { stepSize: 5 },
+                ticks: { 
+                    stepSize: 5,
+                    callback: function(value) {
+                        return value === 0 ? '' : value; // 0 ni ko'rsatmaslik
+                    }
+                },
                 grid: {
                     display: true,
                 }
@@ -120,7 +179,7 @@ const LineChart = ({ year = new Date().getFullYear(), data = [] }) => {
         },
         elements: {
             line: {
-                tension: 0,
+                tension: 0.4, // Biroz egri chiziq
                 cubicInterpolationMode: 'default',
                 capBezierPoints: false,
             },
@@ -131,9 +190,8 @@ const LineChart = ({ year = new Date().getFullYear(), data = [] }) => {
             },
         },
     };
+    
     return <Line data={chartData} options={options} />;
 };
 
 export default LineChart;
-
-
