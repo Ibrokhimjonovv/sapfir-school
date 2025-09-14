@@ -150,34 +150,38 @@
       }
     }
     .add-student-card {
-        padding: 10px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+
+      h2 {
+        text-align: center;
+        font-weight: 500;
+      }
+
+      .btn-line {
         display: flex;
         align-items: center;
-        flex-direction: column;
         justify-content: center;
+        flex-direction: column;
+        margin-top: 10px;
+        row-gap: 5px;
 
-        h2 {
-            text-align: center;
-            font-weight: 500;
+        a {
+          text-align: center;
+          width: 179px;
+          background-color: #ff8a00;
+          padding: 10px 20px;
+          border-radius: 15px;
+          color: #fff;
+
+          &:hover {
+            background-color: #ea641e;
+          }
         }
-
-        .btn-line {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-
-            a {
-                background-color: #ff8a00;
-                padding: 10px 20px;
-                border-radius: 15px;
-                color: #fff;
-
-                &:hover {
-                    background-color: #ea641e;
-                }
-            }
-        }
+      }
     }
   }
 }
@@ -209,8 +213,9 @@
     }
     .middle-line {
       grid-template-columns: repeat(1, 1fr);
-    
-      .monthly-class-chart, .monthly-school-chart {
+
+      .monthly-class-chart,
+      .monthly-school-chart {
         .line {
           justify-content: flex-start;
 

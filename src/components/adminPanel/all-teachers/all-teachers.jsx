@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Switch } from 'antd';
 
 const TeachersWithClasses = () => {
     const [teachers, setTeachers] = useState([]);
@@ -136,6 +137,29 @@ const TeachersWithClasses = () => {
         }
     };
 
+     const handleSwitchChange = async (teacherId, field, checked) => {
+        const teacher = teachers.find(t => t.id === teacherId);
+        if (!teacher) return;
+
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_TEACHER_API}/teachers/${teacherId}/`, {
+                method: 'PATCH', // PATCH ishlatamiz
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [field]: checked }),
+            });
+
+            if (!response.ok) throw new Error('Oʻqituvchi huquqini yangilashda xatolik');
+
+            setTeachers(prev =>
+                prev.map(t => t.id === teacherId ? { ...t, [field]: checked } : t)
+            );
+        } catch (err) {
+            setError(err.message);
+            alert('Xatolik: ' + err.message);
+        }
+    };
+
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setEditForm(prev => ({
@@ -153,6 +177,30 @@ const TeachersWithClasses = () => {
             <div className="teachers-list">
                 {teachers.map(teacher => (
                     <div key={teacher.id} className="teacher-item">
+                        {/* Checkboxlar */}
+                        <div className="teacher-permissions" style={{ marginBottom: '10px' }}>
+                            <span style={{ marginRight: '10px' }}>
+                                O'quvchi qo'shish: 
+                                <Switch
+                                    checked={teacher.student_permision}
+                                    onChange={(checked) => handleSwitchChange(teacher.id, 'student_permision', checked)}
+                                />
+                            </span>
+                            <span style={{ marginRight: '10px' }}>
+                                Test qo'shish: 
+                                <Switch
+                                    checked={teacher.test_permision}
+                                    onChange={(checked) => handleSwitchChange(teacher.id, 'test_permision', checked)}
+                                />
+                            </span>
+                            <span>
+                                Sinf qo'shish: 
+                                <Switch
+                                    checked={teacher.class_permision}
+                                    onChange={(checked) => handleSwitchChange(teacher.id, 'class_permision', checked)}
+                                />
+                            </span>
+                        </div>
                         <div className="teacher-header">
                             <div
                                 className="teacher-info"
@@ -207,7 +255,7 @@ const TeachersWithClasses = () => {
                                                     Saqlash
                                                 </button>
                                                 <button
-                                                type='button'
+                                                    type='button'
                                                     className="btn-cancel"
                                                     onClick={handleCancelEdit}
                                                 >

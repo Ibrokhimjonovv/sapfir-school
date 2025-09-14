@@ -183,7 +183,7 @@ const AddStudent = () => {
   };
 
 
-  if(profileData?.user_type != "teacher") return <NotFound />
+  if(profileData?.student_permissions) return <NotFound />
 
   return (
     <div className='add-student-container'>

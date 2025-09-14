@@ -1,25 +1,11 @@
 'use client'
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./teacherProfile.scss";
-import { AccessContext } from "@/contexts/contexts";
-import Loading from "@/components/loading/layout";
-import Waves from "@/components/rankCard/rank-card";
-import LineChart from "@/components/rank-chart/chart";
-import ScienceTest from "@/components/scienceTestResults/science-test";
 import Logout from "@/components/logout/logout";
 import Link from "next/link";
 import TeacherClasses from "../teachersClasses/teachersClasses";
 
-const sampleStats = {
-  2022: [3, 4, 7, 2, 1, 5, 6, 2, 1, 4, 3, 2],
-  2023: [5, 7, 8, 3, 2, 2, 9, 6, 5, 3, 2, 1],
-  2024: [2, 20, 3],
-};
-
-const TeacherProfile = ({profileData}) => {
-  const currentClassRank = 3;
-  const currentSchoolRank = 2;
-  const [selectedYear, setSelectedYear] = useState(2024);
+const TeacherProfile = ({ profileData }) => {
   const [editProfileModal, setEditProfileModal] = useState(false);
 
   const toggleShowModal = () => {
@@ -54,15 +40,32 @@ const TeacherProfile = ({profileData}) => {
           </div>
         </div>
         <div className="add-student-card">
-            <h2>Sizga bog'langan sinflar uchun o'quvchi qo'shishingiz mumkun</h2>
-            <div className="btn-line">
-                <Link href='/profile/add-student'>O'quvchi qo'shish</Link>
-            </div>
+          <h2>Sizga berilgan ruxsatlar bo'yicha amallar bajarishingiz mumkun</h2>
+          <div className="btn-line">
+            {
+              profileData.student_permision || profileData.class_permision || profileData.test_permision ? (
+                <>
+                  {
+                    profileData.student_permision && <Link href='/profile/add-student'>O'quvchi qo'shish</Link>
+                  }
+                  {
+                    profileData.class_permision && <Link href='/profile/add-class'>Sinf qo'shish</Link>
+                  }
+                  {
+                    profileData.test_permision && <Link href='/profile/add-tests'>Test qo'shish</Link>
+                  }
+                </>
+              ) : (
+                <p>Sizga hech qanday ruxsatlar berilmagan</p>
+              )
+            }
+
+          </div>
         </div>
       </div>
-        <div className="mid-line">
-            <TeacherClasses />
-        </div>
+      <div className="mid-line">
+        <TeacherClasses />
+      </div>
     </section>
   );
 };

@@ -105,6 +105,22 @@
 
   .teacher-item {
     border-bottom: 1px solid #eee;
+
+    .teacher-permissions {
+      margin-top: 5px;
+      display: flex;
+      justify-content: center;
+
+      span {
+        display: flex;
+        align-items: center;
+      }
+
+      button {
+        padding: 0;
+        margin-left: 5px;
+      }
+    }
   }
 
   .teacher-item:last-child {
@@ -214,6 +230,10 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+
+    &[role="switch"] {
+      border-radius: 100px;
+    }
   }
 
   .btn-edit {
